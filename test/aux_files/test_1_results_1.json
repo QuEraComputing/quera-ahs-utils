@@ -1,0 +1,23 @@
+{
+  "task_status_code": 200,
+  "shot_outputs": [
+    {
+      "shot_status_code": 200,
+      "pre_sequence": [
+        1,1,1,1
+      ],
+      "post_sequence": [
+        1,0,1,0
+      ]
+    },
+    {
+      "shot_status_code": 200,
+      "pre_sequence": [
+        1,1,0,1
+      ],
+      "post_sequence": [
+        1,0,0,0
+      ]
+    }
+  ]
+}
