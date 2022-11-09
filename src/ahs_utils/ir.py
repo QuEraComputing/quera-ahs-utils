@@ -27,9 +27,6 @@ def from_json_file(json_filename):
 
     return js
 
-
-
-
 def quera_json_to_ahs(js: dict) -> AnalogHamiltonianSimulation:
     register = AtomArrangement()
 
