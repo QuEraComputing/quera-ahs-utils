@@ -8,11 +8,11 @@ from braket.ahs.atom_arrangement import AtomArrangement
 from decimal import Decimal
 from typing import Any, Dict
 
-import simplejson as json
+# import simplejson as json
 from braket.ir.ahs import Program
 
 import json
-import numpy
+import numpy as np
 
 
 def to_json_file(js,json_filename,**json_options):
@@ -48,7 +48,7 @@ def quera_json_to_ahs(js: dict) -> AnalogHamiltonianSimulation:
     detuning = TimeSeries()  
     phase = TimeSeries()    
 
-    for t,amplitude_value in zip(js_amplitude["times"],js_ampitude["values"]):
+    for t,amplitude_value in zip(js_amplitude["times"],js_amplitude["values"]):
         amplitude.put(t, amplitude_value)
 
     for t,detuning_value in zip(js_detuning["times"],js_detuning["values"]):
@@ -69,68 +69,6 @@ def quera_json_to_ahs(js: dict) -> AnalogHamiltonianSimulation:
             hamiltonian=drive
         )
 
-def braket_ir_to_quera_json(ahs_program: Program, shots: int = 1) -> dict:
-    """Translates Braket AHS IR program to Quera-compatible JSON.
-
-    Args:
-        ahs_program (Program): AHS IR representation
-        shots (int): The number of shots to run this program
-
-    Returns:
-        str: Serialized Quera-compatible JSON representation of program
-
-    Raises:
-        ValidationException: If any schema mismatch with Braket AHS and/or Quera task IR.
-    """
-    
-    # AHS IR Program
-    ahs_atom_array = ahs_program.setup.atomArray
-    ahs_driving_fields = ahs_program.hamiltonian.drivingFields
-    ahs_shifting_fields = ahs_program.hamiltonian.shiftingFields
-
-    # QuEra IR Program
-    translated_quera_program = dict()
-    translated_quera_program["nshots"] = shots
-    translated_quera_program["lattice"] = ahs_atom_array.dict()
-
-    translated_quera_program["effective_hamiltonian"] = {
-        "rydberg": {
-            "rabi_frequency_amplitude": {"global": {"times": [], "values": []}},
-            "rabi_frequency_phase": {"global": {"times": [], "values": []}},
-            "detuning": {
-                "global": {"times": [], "values": []},
-            },
-        }
-    }
-    rydberg_translated_quera_program = translated_quera_program["effective_hamiltonian"]["rydberg"]
-    quera_rabi_frequency_amplitude = rydberg_translated_quera_program["rabi_frequency_amplitude"]["global"]
-    quera_rabi_frequency_phase = rydberg_translated_quera_program["rabi_frequency_phase"]["global"]
-    quera_detuning_global = rydberg_translated_quera_program["detuning"]["global"]
-
-    for ahs_driving_field in ahs_driving_fields:
-        quera_rabi_frequency_amplitude["values"].extend(ahs_driving_field.amplitude.sequence.values)
-        quera_rabi_frequency_amplitude["times"].extend(ahs_driving_field.amplitude.sequence.times)
-
-        quera_rabi_frequency_phase["values"].extend(ahs_driving_field.phase.sequence.values)
-        quera_rabi_frequency_phase["times"].extend(ahs_driving_field.phase.sequence.times)
-
-        quera_detuning_global["values"].extend(ahs_driving_field.detuning.sequence.values)
-        quera_detuning_global["times"].extend(ahs_driving_field.detuning.sequence.times)
-
-
-    if ahs_shifting_fields:
-        quera_detuning_local = rydberg_translated_quera_program["detuning"]["local"] = []
-        for ahs_shifting_field in ahs_shifting_fields:
-            quera_detuning_local.append(
-                {
-                    "values": ahs_shifting_field.magnitude.sequence.values,
-                    "times": ahs_shifting_field.magnitude.sequence.times,
-                    "lattice_site_coefficients": ahs_shifting_field.magnitude.pattern,
-                }
-            )
-
-    return json.loads(json.dumps(translated_quera_program,use_decimal=True))
-
 def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) -> dict:
     """Translates Braket AHS IR program to Quera-compatible JSON.
 
@@ -144,4 +82,62 @@ def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) 
     Raises:
         ValidationException: If any schema mismatch with Braket AHS and/or Quera task IR.
     """
-    return braket_ir_to_quera_json(ahs.to_ir(),shots)
+    sites = []
+    filling = []
+    for site in ahs.register:
+        x,y = site.coordinate
+        site_type = site.site_type
+        fill = 1 if site_type == SiteType.FILLED else 0
+        sites.append([x,y])
+        filling.append(fill)
+
+
+    rabi_times = list(np.array(ahs.hamiltonian.amplitude.time_series.times(),dtype=np.float64))
+    rabi_values = list(np.array(ahs.hamiltonian.amplitude.time_series.values(),dtype=np.float64))
+
+    phase_times = list(np.array(ahs.hamiltonian.phase.time_series.times(),dtype=np.float64))
+    phase_values = list(np.array(ahs.hamiltonian.phase.time_series.values(),dtype=np.float64))
+
+    detuning_times = list(np.array(ahs.hamiltonian.detuning.time_series.times(),dtype=np.float64))
+    detuning_values = list(np.array(ahs.hamiltonian.detuning.time_series.values(),dtype=np.float64))
+    
+
+    # QuEra IR Program
+    translated_quera_program = dict()
+    translated_quera_program["nshots"] = shots
+    translated_quera_program["lattice"] = {"sites":sites,"filling":filling}
+    translated_quera_program["effective_hamiltonian"] = {
+        "rydberg": {
+            "rabi_frequency_amplitude": {"global": {"times": rabi_times, "values": rabi_values}},
+            "rabi_frequency_phase": {"global": {"times": phase_times, "values":phase_values}},
+            "detuning": {
+                "global": {"times": detuning_times, "values": detuning_values},
+            },
+        }
+    }
+    
+
+
+    return translated_quera_program
+
+if __name__=="__main__":
+    register = AtomArrangement()
+    register.add((0,0))
+    
+    ts = TimeSeries()
+    ts.put(0,0)
+    ts.put(0,4e-6)
+
+    drive = DrivingField(amplitude=ts,phase=ts,detuning=ts)
+
+    ahs = AnalogHamiltonianSimulation(register=register,hamiltonian=drive)
+
+    js = braket_sdk_to_quera_json(ahs,shots=100)
+
+    shots,ahs = quera_json_to_ahs(js)
+    js_2 = braket_sdk_to_quera_json(ahs,shots=shots)
+
+    print(js==js_2)
+
+
+
