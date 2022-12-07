@@ -6,7 +6,7 @@ from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement
 
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any, Dict,Tuple
 
 # import simplejson as json
 from braket.ir.ahs import Program
@@ -27,7 +27,7 @@ def from_json_file(json_filename):
 
     return js
 
-def quera_json_to_ahs(js: dict) -> AnalogHamiltonianSimulation:
+def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
     register = AtomArrangement()
 
     nshots = js["nshots"]
@@ -119,25 +119,3 @@ def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) 
 
 
     return translated_quera_program
-
-if __name__=="__main__":
-    register = AtomArrangement()
-    register.add((0,0))
-    
-    ts = TimeSeries()
-    ts.put(0,0)
-    ts.put(0,4e-6)
-
-    drive = DrivingField(amplitude=ts,phase=ts,detuning=ts)
-
-    ahs = AnalogHamiltonianSimulation(register=register,hamiltonian=drive)
-
-    js = braket_sdk_to_quera_json(ahs,shots=100)
-
-    shots,ahs = quera_json_to_ahs(js)
-    js_2 = braket_sdk_to_quera_json(ahs,shots=shots)
-
-    print(js==js_2)
-
-
-
