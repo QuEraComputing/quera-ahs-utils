@@ -1,7 +1,7 @@
 import json
 import unittest
-import os,sys
-import sys,os
+import sys
+import os
 
 from braket.ahs.atom_arrangement import SiteType
 from braket.timings.time_series import TimeSeries

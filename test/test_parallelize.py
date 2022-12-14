@@ -1,7 +1,7 @@
 import json
 import unittest
-import os,sys
-import sys,os
+import sys
+import os
 cwd = os.path.dirname(os.path.abspath(__file__))
 module_path = os.path.abspath(os.path.join(cwd,"..","src"))
 sys.path.insert(0,module_path)
