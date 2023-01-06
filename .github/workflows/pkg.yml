@@ -15,20 +15,20 @@ jobs:
         python-version: '3.9'
 
     - name: Checking pip 
-      run:  python -m ensurepip --upgrade
+      run:  python3 -m ensurepip --upgrade
 
     - name: Install
       run: pip install ${{github.workspace}}
 
     - name: Test
       working-directory: ${{github.workspace}}/test
-      run: python -m unittest 
+      run: python3 -m unittest 
 
     - name: Build Egg
-      run: python setup.py bdist_wheel
+      run: python3 setup.py bdist_wheel
 
     - name: Get Version
-      run: echo VERSION="$(python setup.py --version)" >> $GITHUB_ENV
+      run: echo VERSION="$(python3 setup.py --version)" >> $GITHUB_ENV
       
     - name: Tag Release
       uses: softprops/action-gh-release@v1
