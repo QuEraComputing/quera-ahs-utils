@@ -14,19 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python
+    - name: python setup
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    - name: checking pip 
+    - name: Checking pip 
       run:  python -m ensurepip --upgrade
 
     - name: Install
       run: pip install ${{github.workspace}}
 
     - name: Test
-      working-directory: ${{github.workspace}}/tests
+      working-directory: ${{github.workspace}}/test
       run: python -m unittest 
 
     # - name: Build package
