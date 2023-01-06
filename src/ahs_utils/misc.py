@@ -2,6 +2,11 @@ import numpy as np
 from braket.tasks.analog_hamiltonian_simulation_quantum_task_result import AnalogHamiltonianSimulationQuantumTaskResult
 
 
+__all__ = [
+    'get_counts',
+    'get_avg_density',
+]
+
 
 def get_counts(result: AnalogHamiltonianSimulationQuantumTaskResult) -> Dict[str, int]:
     """Aggregate state counts from AHS shot results
