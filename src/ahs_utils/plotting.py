@@ -8,7 +8,14 @@ from braket.ahs.shifting_field import ShiftingField
 from braket.tasks.analog_hamiltonian_simulation_quantum_task_result import AnalogHamiltonianSimulationQuantumTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
 
-
+__all__ = [
+    "show_register",
+    "show_global_drive",
+    'show_local_shift',
+    'show_drive_and_shift',
+    'show_final_avg_density',
+    'plot_avg_density',
+]
 
 def show_register(
     register: AtomArrangement, 
@@ -52,7 +59,6 @@ def show_register(
             plt.gca().add_patch( plt.Circle((site[0],site[1]), blockade_radius/2, color="b", alpha=0.3) )
         plt.gca().set_aspect(1)
     plt.show()
-
 
 
 def show_global_drive(drive, axes=None, **plot_ops):
@@ -147,8 +153,6 @@ def show_final_avg_density(result: AnalogHamiltonianSimulationQuantumTaskResult)
     plt.xlabel("Indices of atoms")
     plt.ylabel("Average Rydberg density")
     plt.show()
-
-
 
 
 def plot_avg_density(densities, register, with_labels = True, custom_axes = None, cmap=None):
