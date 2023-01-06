@@ -19,14 +19,15 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install build dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install pytest
-        pip install -e .
-    - name: Run Unit Tests
-      run: |
-        python -m pytest -v tests/
+    - name: checking pip 
+      run:  python -m ensurepip --upgrade
+
+    - name: Install
+      run: pip install ${{github.workspace}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/tests
+      run: python -m unittest 
 
     # - name: Build package
     #   if: github.event_name == 'push'
