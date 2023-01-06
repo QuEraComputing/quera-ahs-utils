@@ -15,10 +15,16 @@ import json
 import numpy as np
 
 
+__all__ = [
+    'to_json_file',
+    'from_json_file',
+    'quera_json_to_ahs',
+    'braket_sdk_to_quera_json',
+]
+
 def to_json_file(js,json_filename,**json_options):
     with open(json_filename,"w") as IO:
         json.dump(js,IO,**json_options)
-
 
 
 def from_json_file(json_filename):
@@ -26,6 +32,7 @@ def from_json_file(json_filename):
         js = json.load(IO)
 
     return js
+
 
 def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
     register = AtomArrangement()
@@ -68,6 +75,7 @@ def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
             register=register, 
             hamiltonian=drive
         )
+
 
 def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) -> dict:
     """Translates Braket AHS IR program to Quera-compatible JSON.
