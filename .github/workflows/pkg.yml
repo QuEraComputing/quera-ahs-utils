@@ -18,9 +18,7 @@ jobs:
       run:  python3 -m ensurepip --upgrade
 
     - name: Install
-      run: |
-        pip install setuptools
-        pip install ${{github.workspace}}
+      run: pippip install ${{github.workspace}}
 
     - name: Test
       working-directory: ${{github.workspace}}/test
