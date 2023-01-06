@@ -5,14 +5,37 @@ on:
       - main
 
 jobs:
-  create-tag:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
-      - run: echo VERSION="$(python setup.py --version)" >> $GITHUB_ENV
-      - uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.VERSION }}
+    - uses: actions/checkout@v3
+    - name: python setup
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Checking pip 
+      run:  python -m ensurepip --upgrade
+
+    - name: Install
+      run: pip install ${{github.workspace}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/test
+      run: python -m unittest 
+
+    - name: Build Egg
+      run: python setup.py bdist_wheel
+
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+    - name: Get Version
+      run: echo VERSION="$(python setup.py --version)" >> $GITHUB_ENV
+      
+    - name: Tag Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.VERSION }}

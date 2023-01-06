@@ -28,12 +28,3 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/test
       run: python -m unittest 
-
-    # - name: Build package
-    #   if: github.event_name == 'push'
-    #   run: python setup.py bdist_wheel
-
-    # - name: Publish to pypi
-    #   if: github.event_name == 'push'
-    #   run: |
-    #     jf rt u "dist/*.whl" "Development/"

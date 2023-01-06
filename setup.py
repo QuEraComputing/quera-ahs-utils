@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
 from setuptools import setup
-exec(open('src/quera_ahs_utils/_version.py', 'r').read())
+with open('src/quera_ahs_utils/_version.py', 'r') as IO:
+    exec(IO.read())
 setup(version=__version__)
