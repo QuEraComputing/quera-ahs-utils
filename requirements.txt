@@ -1,4 +1,4 @@
-  aws-braket-sdk-python
+  amazon-braket-sdk-python
   networkx
   numpy
   scipy
