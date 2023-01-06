@@ -6,11 +6,7 @@ from datetime import datetime
 import os
 import sys
 
-cwd = os.path.dirname(os.path.abspath(__file__))
-module_path = os.path.abspath(os.path.join(cwd,"..","src"))
-sys.path.insert(0,module_path)
-
-import ahs_utils
+from quera_ahs_utils.plotting import plot_avg_density
 
 def test_plot_avg_density():
     # create register
@@ -39,7 +35,7 @@ def test_plot_avg_density():
     fig, ax = plt.subplots()
 
     # generate plot on custom axis
-    ahs_utils.plot_avg_density(densities, register, custom_axes=ax)
+    plot_avg_density(densities, register, custom_axes=ax)
 
     # save plot with date and time to file
     now = datetime.now()

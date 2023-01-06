@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quera-ahs-utils"
+version = "0.0.1"
+authors = [
+  { name="Phillip Weinberg", email="pweinberg@quera.com" },
+  { name="John Long", email="jlong@quera.com" }
+]
+maintainers = [
+  { name="Phillip Weinberg", email="pweinberg@quera.com" },
+  { name="John Long", email="jlong@quera.com" }
+]
+description = "Various tools to interact with Braket Analog Hamiltonian Computing"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/QuEraComputing/quera-ahs-utils"
+"Bug Tracker" = "https://github.com/QuEraComputing/quera-ahs-utils/issues"
