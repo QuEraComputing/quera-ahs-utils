@@ -18,14 +18,16 @@ jobs:
       run:  python3 -m ensurepip --upgrade
 
     - name: Install
-      run: pip install ${{github.workspace}}
+      run: |
+        pip install setuptools
+        pip install ${{github.workspace}}
 
     - name: Test
       working-directory: ${{github.workspace}}/test
       run: python3 -m unittest 
 
     - name: Build Egg
-      run: python3 setup.py bdist_wheel
+      run: python3 -m pip install --upgrade build && python3 -m build
 
     - name: Get Version
       run: echo VERSION="$(python3 setup.py --version)" >> $GITHUB_ENV
