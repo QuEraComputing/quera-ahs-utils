@@ -1,4 +1,4 @@
-amazon-braket-sdk-python
+amazon-braket-sdk
 networkx
 numpy
 scipy
