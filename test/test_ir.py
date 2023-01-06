@@ -11,12 +11,7 @@ from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement,SiteType
 
 
-
-cwd = os.path.dirname(os.path.abspath(__file__))
-module_path = os.path.abspath(os.path.join(cwd,"..","src"))
-sys.path.insert(0,module_path)
-
-from ahs_utils.ir import braket_sdk_to_quera_json, quera_json_to_ahs
+from quera_ahs_utils.ir import braket_sdk_to_quera_json, quera_json_to_ahs
 import numpy as np
 
 

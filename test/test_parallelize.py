@@ -2,11 +2,8 @@ import json
 import unittest
 import os,sys
 import sys,os
-cwd = os.path.dirname(os.path.abspath(__file__))
-module_path = os.path.abspath(os.path.join(cwd,"..","src"))
-sys.path.insert(0,module_path)
 
-from ahs_utils.parallelize import parallelize_quera_json,get_shots_quera_results
+from quera_ahs_utils.parallelize import parallelize_quera_json,get_shots_quera_results
 import numpy as np
 
 
