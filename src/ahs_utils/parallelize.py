@@ -9,6 +9,16 @@ from braket.task_result import AnalogHamiltonianSimulationTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
 
 
+__all__ = [
+    'generate_parallel_register',
+    'parallelize_field',
+    'parallelize_hamiltonian',
+    'parallelize_ahs',
+    'get_shots_braket_sdk_results',
+    'parallelize_quera_json',
+    'get_shots_quera_results',
+]
+
 def generate_parallel_register(register:AtomArrangement,qpu,interproblem_distance):
     x_min = min(*[site.coordinate[0] for site in register])
     x_max = max(*[site.coordinate[0] for site in register])
@@ -54,11 +64,13 @@ def generate_parallel_register(register:AtomArrangement,qpu,interproblem_distanc
 
     return parallel_register,batch_mapping
 
+
 def parallelize_field(field:Field,batch_mapping:dict):
     if field.pattern == None:
         return field
     else:
         raise NotImplementedError("Non-uniform pattern note supported in parallelization")
+
 
 def parallelize_hamiltonian(driving_field: DrivingField,batch_mapping:dict) -> DrivingField:
     return DrivingField(
@@ -66,6 +78,7 @@ def parallelize_hamiltonian(driving_field: DrivingField,batch_mapping:dict) -> D
         phase=parallelize_field(driving_field.phase,batch_mapping),
         detuning=parallelize_field(driving_field.detuning,batch_mapping)
         )
+
 
 def parallelize_ahs(ahs:AnalogHamiltonianSimulation,qpu,interproblem_distance) -> AnalogHamiltonianSimulation:
     parallel_register,batch_mapping = generate_parallel_register(ahs.register,qpu,interproblem_distance)
@@ -75,6 +88,7 @@ def parallelize_ahs(ahs:AnalogHamiltonianSimulation,qpu,interproblem_distance) -
         hamiltonian=parallelize_hamiltonian(ahs.hamiltonian,batch_mapping)
     )
     return parallel_program,batch_mapping
+
 
 def get_shots_braket_sdk_results(results: AnalogHamiltonianSimulationTaskResult,
 batch_mapping=None,post_select=True):
