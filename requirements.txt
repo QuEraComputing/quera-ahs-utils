@@ -1,5 +1,5 @@
-  amazon-braket-sdk-python
-  networkx
-  numpy
-  scipy
-  matplotlib
+amazon-braket-sdk-python
+networkx
+numpy
+scipy
+matplotlib
