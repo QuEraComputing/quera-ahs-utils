@@ -5,8 +5,7 @@ from braket.ahs.driving_field import DrivingField
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement
 
-from decimal import Decimal
-from typing import Any, Dict,Tuple
+from typing import NoReturn,Tuple
 
 # import simplejson as json
 from braket.ir.ahs import Program
@@ -22,12 +21,27 @@ __all__ = [
     'braket_sdk_to_quera_json',
 ]
 
-def to_json_file(js,json_filename,**json_options):
+def to_json_file(js:dict,json_filename:str,**json_options) -> NoReturn:
+    """prints out a dictionary to a json file. 
+
+    Args:
+        js (dict): data to be serialaized.
+        json_filename (str): filename to output to.
+        
+    """
     with open(json_filename,"w") as IO:
         json.dump(js,IO,**json_options)
 
 
-def from_json_file(json_filename):
+def from_json_file(json_filename:str) -> dict:
+    """deserialize a json file. 
+
+    Args:
+        json_filename (str): the json file to deserialize. 
+
+    Returns:
+        dict: the json file deserialized as a python dict. 
+    """
     with open(json_filename,"w") as IO:
         js = json.load(IO)
 
@@ -35,6 +49,17 @@ def from_json_file(json_filename):
 
 
 def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
+    """Convert a QuEra compatible program to a braket AHS program. 
+
+    Args:
+        js (dict): dictionary containing a program formatted to be accepted by 
+        the QuEra API. 
+
+    Returns:
+        Tuple[int,AnalogHamiltonianSimulation]: A tuple continaing
+            the number of shots as the first element and the ahs program 
+            as the second argument. 
+    """
     register = AtomArrangement()
 
     nshots = js["nshots"]
@@ -85,10 +110,7 @@ def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) 
         shots (int): The number of shots to run this program
 
     Returns:
-        str: Serialized Quera-compatible JSON representation of program
-
-    Raises:
-        ValidationException: If any schema mismatch with Braket AHS and/or Quera task IR.
+        dict: Serialized QuEra-compatible dict representation of program
     """
     sites = []
     filling = []
