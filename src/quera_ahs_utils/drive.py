@@ -8,9 +8,9 @@ from braket.ahs.pattern import Pattern
 from collections import Counter
 
 from typing import Dict, List, Tuple
-from braket.tasks.analog_hamiltonian_simulation_quantum_task_result import AnalogHamiltonianSimulationQuantumTaskResult
+from braket.tasks.analog_hamiltonian_simulation_quantum_task_result \
+    import AnalogHamiltonianSimulationQuantumTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
-
 
 
 __all__ = [
@@ -24,6 +24,7 @@ __all__ = [
     "concatenate_drive_list",
     "concatenate_shift_list"
 ]
+
 
 def rabi_pulse(
     rabi_pulse_area: float, 

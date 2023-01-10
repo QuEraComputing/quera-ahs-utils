@@ -38,9 +38,15 @@ jobs:
     - name: Checking pip 
       run:  python -m ensurepip --upgrade
 
+    - name: install pdoc3
+      run: pip install pdoc3
+
     - name: Install
       run: pip install ${{github.workspace}}
 
     - name: Test
       working-directory: ${{github.workspace}}/test
       run: python -m unittest 
+
+    - name: Build docs
+      run: pdoc --html quera_ahs_utils -o ${{github.workspace}}/docs
