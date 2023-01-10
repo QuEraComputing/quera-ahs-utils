@@ -6,7 +6,9 @@ We would be remiss not to advertise our own [Julia](https://julialang.org/) SDK 
 ## Installation
 The package can be installed via `pip`:
 
+```
     pip install quera-ahs-utils
+```
 
 ## Package contents
 
@@ -14,9 +16,9 @@ The package can be installed via `pip`:
 |              module             |                                                       description                                                      |
 |:-------------------------------:|:----------------------------------------------------------------------------------------------------------------------:|
 | **quera_ahs_utils**.analysis    | Perform analysis on shot results                                                         |
-| **quera_ahs_utils**.drive       | A collection of functions to easily generate different types of driving hamiltonians                                   |
-| **quera_ahs_utils**.ir          | A collection of functions to transform between QuEra and Braket program representations                                |
-| **quera_ahs_utils**.parallelize | A collection of functions to transform small jobs into a parallel set of jobs to maximize the field of view of the QPU |
-| **quera_ahs_utils**.plotting    | A collection of functions to help visualize both **ahs** programs as well as its results.                              |
+| **quera_ahs_utils**.drive       | Easily generate different types of driving hamiltonians                                   |
+| **quera_ahs_utils**.ir          | Transform between QuEra and Braket program representations                                |
+| **quera_ahs_utils**.parallelize | Transform small jobs into a parallel set of jobs to maximize the field of view of the QPU |
+| **quera_ahs_utils**.plotting    | Visualize both **ahs** programs as well as its results.                              |
 
 A module reference can be found [here](https://queracomputing.github.io/quera-ahs-utils/)
