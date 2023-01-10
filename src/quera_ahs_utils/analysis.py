@@ -1,6 +1,6 @@
 import numpy as np
 from braket.tasks.analog_hamiltonian_simulation_quantum_task_result import AnalogHamiltonianSimulationQuantumTaskResult
-
+from typing import Dict
 
 __all__ = [
     'get_counts',
