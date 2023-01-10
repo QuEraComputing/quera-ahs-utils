@@ -6,6 +6,8 @@ on:
       - main
     tags: '*'
   pull_request:
+    branches:
+      - main
     types: [opened]
 
 jobs:
@@ -39,7 +41,7 @@ jobs:
       run: |
         mkdir _site/
         tar -czvf _site/github-pages.tar.gz ./html
-        
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1
 
