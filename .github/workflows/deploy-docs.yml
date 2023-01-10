@@ -1,0 +1,67 @@
+name: 'Build and Deploy documentation'
+
+on:
+  push:
+    branches:
+      - main
+    tags: '*'
+  pull_request:
+    types: [opened]
+
+jobs:
+  # Build job
+  test_and_build:
+    needs: pre_job
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: python setup
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Checking pip 
+      run:  python -m ensurepip --upgrade
+
+    - name: install pdoc3
+      run: pip install pdoc3
+
+    - name: Install
+      run: pip install ${{github.workspace}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/test
+      run: python -m unittest 
+
+    - name: Build docs
+      run: pdoc --html quera_ahs_utils 
+
+    - name: Create archive
+      run: |
+       - mkdir _site/
+       - tar -czvf _site/github-pages.tar.gz ./html
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: test_and_build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
