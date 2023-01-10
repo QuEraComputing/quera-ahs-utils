@@ -47,6 +47,3 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/test
       run: python -m unittest 
-
-    - name: Build docs
-      run: pdoc --html quera_ahs_utils -o ${{github.workspace}}/docs
