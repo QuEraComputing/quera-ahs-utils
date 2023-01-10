@@ -13,7 +13,7 @@ The package can be installed via `pip`:
 **quera-ahs-utils** is broken up into 5 modules each dealing with specific tools summarized in the table below:
 |              module             |                                                       description                                                      |
 |:-------------------------------:|:----------------------------------------------------------------------------------------------------------------------:|
-| **quera_ahs_utils**.analysis    | A collection of functions to do basic analysis on shot results                                                         |
+| **quera_ahs_utils**.analysis    | Perform analysis on shot results                                                         |
 | **quera_ahs_utils**.drive       | A collection of functions to easily generate different types of driving hamiltonians                                   |
 | **quera_ahs_utils**.ir          | A collection of functions to transform between QuEra and Braket program representations                                |
 | **quera_ahs_utils**.parallelize | A collection of functions to transform small jobs into a parallel set of jobs to maximize the field of view of the QPU |
