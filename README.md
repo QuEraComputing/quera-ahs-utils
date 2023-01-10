@@ -4,7 +4,7 @@ This python package is a collection of tools that can be used to program QuEra's
 We would be remiss not to advertise our own [Julia](https://julialang.org/) SDK for programming QuEra's **ahs**, [Bloqade](https://queracomputing.github.io/Bloqade.jl/dev/) as well as modeling neutral atom quantum computing. 
 
 ## Installation
-The package can be installed via pip:
+The package can be installed via `pip`:
 
     pip install quera-ahs-utils
 
