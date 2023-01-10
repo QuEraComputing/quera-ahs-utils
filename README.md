@@ -1,7 +1,7 @@
 # quera-ahs-utils
 This python package is a collection of tools that can be used to program QuEra's **neutral atom Analog Hamiltonian Simulator** (**ahs**). These tools are primarily targeted towards the usage of [Amazon's Braket quantum computing service](https://aws.amazon.com/braket/). The Braket Python SDK can be found [here](https://github.com/aws/amazon-braket-sdk-python) along with some examples of how to use their service through a collection of examples from both [Braket](https://github.com/aws/amazon-braket-examples/tree/main/examples/analog_hamiltonian_simulation) and [QuEra](https://github.com/QuEraComputing/QuEra-braket-examples). 
 
-We would be remiss not to advertise our own Julia SDK for programming QuEra's **ahs**, [Bloqade](https://queracomputing.github.io/Bloqade.jl/dev/). Bloqade is a powerful [Julia](https://julialang.org/) package tool for programming and modeling neutral atom quantum computing. 
+We would be remiss not to advertise our own [Julia](https://julialang.org/) SDK for programming QuEra's **ahs**, [Bloqade](https://queracomputing.github.io/Bloqade.jl/dev/) as well as modeling neutral atom quantum computing. 
 
 ## Installation
 The package can be installed via pip:
