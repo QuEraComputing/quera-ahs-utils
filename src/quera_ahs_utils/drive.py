@@ -32,7 +32,7 @@ def rabi_pulse(
     omega_slew_rate_max: float
 ) -> Tuple[List[float], List[float]]:
     """Get a time series for Rabi frequency with specified Rabi phase, maximum amplitude
-    and maximum slew rate
+        and maximum slew rate
 
         Args:
             rabi_pulse_area (float): Total area under the Rabi frequency time series
