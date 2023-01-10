@@ -19,4 +19,4 @@ The package can be installed via pip:
 | **quera_ahs_utils**.parallelize | A collection of functions to transform small jobs into a parallel set of jobs to maximize the field of view of the QPU |
 | **quera_ahs_utils**.plotting    | A collection of functions to help visualize both **ahs** programs as well as its results.                              |
 
-A full module reference is currently in progress. 
+A basic module reference can be found [here](https://queracomputing.github.io/quera-ahs-utils/)
