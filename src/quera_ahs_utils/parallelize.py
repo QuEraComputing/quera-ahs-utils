@@ -1,12 +1,16 @@
 
 from itertools import product
-import json
 import numpy as np
+from typing import Tuple,Union,NoReturn,Optional
+from decimal import Decimal
 
+from braket.aws import AwsDevice
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation,DrivingField
 from braket.ahs.field import Field
 from braket.task_result import AnalogHamiltonianSimulationTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
+from braket.ahs.pattern import Pattern
+
 
 
 __all__ = [
@@ -19,7 +23,21 @@ __all__ = [
     'get_shots_quera_results',
 ]
 
-def generate_parallel_register(register:AtomArrangement,qpu,interproblem_distance):
+def generate_parallel_register(
+    register:AtomArrangement,
+    qpu:AwsDevice,
+    interproblem_distance:Union[float,Decimal]
+) -> Tuple[AtomArrangement,dict]:
+    """generate grid of parallel registers from a single register. 
+
+    Args:
+        register (AtomArrangement): The register set to parallelize
+        qpu (AwsDevice): The QPU that will be running the parallel job
+        interproblem_distance (UnionType[float,Decimal]): _description_
+
+    Returns:
+        _type_: _description_
+    """
     x_min = min(*[site.coordinate[0] for site in register])
     x_max = max(*[site.coordinate[0] for site in register])
     y_min = min(*[site.coordinate[1] for site in register])
@@ -65,14 +83,41 @@ def generate_parallel_register(register:AtomArrangement,qpu,interproblem_distanc
     return parallel_register,batch_mapping
 
 
-def parallelize_field(field:Field,batch_mapping:dict):
+def parallelize_field(
+    field:Field,
+    batch_mapping:dict
+) -> Field:
+    """Generate parallel field from a batch_mapping
+
+    Args:
+        field (Field): the field to parallelize
+        batch_mapping (dict): the mapping that describes the parallelization
+
+    Raises:
+        NotImplementedError: currently not supporting local detuning. 
+
+    Returns:
+        Field: the new field that works for the parallel program. 
+    """
     if field.pattern == None:
         return field
     else:
         raise NotImplementedError("Non-uniform pattern note supported in parallelization")
 
 
-def parallelize_hamiltonian(driving_field: DrivingField,batch_mapping:dict) -> DrivingField:
+def parallelize_hamiltonian(
+    driving_field: DrivingField,
+    batch_mapping:dict
+) -> DrivingField:
+    """Generate the parallel driving fields from a batch_mapping. 
+
+    Args:
+        driving_field (DrivingField): The fields to parallelize
+        batch_mapping (dict): the mapping that generates the parallelization
+
+    Returns:
+        DrivingField: the parallelized driving field. 
+    """
     return DrivingField(
         amplitude=parallelize_field(driving_field.amplitude,batch_mapping),
         phase=parallelize_field(driving_field.phase,batch_mapping),
@@ -80,7 +125,21 @@ def parallelize_hamiltonian(driving_field: DrivingField,batch_mapping:dict) -> D
         )
 
 
-def parallelize_ahs(ahs:AnalogHamiltonianSimulation,qpu,interproblem_distance) -> AnalogHamiltonianSimulation:
+def parallelize_ahs(
+    ahs:AnalogHamiltonianSimulation,
+    qpu: AwsDevice,
+    interproblem_distance: Union[float,Decimal]
+) -> AnalogHamiltonianSimulation:
+    """Generate parallel ahs program. 
+
+    Args:
+        ahs (AnalogHamiltonianSimulation): The program to parallelize
+        qpu (AwsDevice): The device to run the parallel jobs
+        interproblem_distance (float, Decimal): The distance between the programs. 
+
+    Returns:
+        AnalogHamiltonianSimulation: The new parallel program ready to run. 
+    """
     parallel_register,batch_mapping = generate_parallel_register(ahs.register,qpu,interproblem_distance)
 
     parallel_program = AnalogHamiltonianSimulation(
@@ -90,8 +149,25 @@ def parallelize_ahs(ahs:AnalogHamiltonianSimulation,qpu,interproblem_distance) -
     return parallel_program,batch_mapping
 
 
-def get_shots_braket_sdk_results(results: AnalogHamiltonianSimulationTaskResult,
-batch_mapping=None,post_select=True):
+def get_shots_braket_sdk_results(
+    results: AnalogHamiltonianSimulationTaskResult,
+    batch_mapping:Optional[dict]=None,
+    post_select:Optional[bool]=True
+)-> np.array:
+    """get the shot results from a braket-sdk task results type. 
+
+    Args:
+        results (AnalogHamiltonianSimulationTaskResult): 
+            The task results to process. 
+        batch_mapping (Optional[dict], optional): 
+            The parallel mapping generated from some parallelization. Defaults to None.
+        post_select (bool, optional): 
+        Post select if atom fails to be sorted in the shot results. Defaults to True.
+
+    Returns:
+        np.array: The shot results stored as 1,0 in the rows of the array.
+        1 is the rydberg state and 0 is the ground state.  
+    """
     # collecting QPU Data
     has_defects = lambda x:  np.any(x==0) if post_select else True
     
@@ -103,7 +179,29 @@ batch_mapping=None,post_select=True):
     return np.array(all_sequences)
 
 
-def parallelize_quera_json(input_json: dict,interproblem_distance,qpu_width,qpu_height,n_site_max):
+def parallelize_quera_json(
+    input_json: dict,
+    interproblem_distance:float,
+    qpu_width:float,
+    qpu_height:float,
+    n_site_max:int
+) -> Tuple[dict,dict]:
+    """Generate a parallel QuEra json program from a single program. 
+
+    Args:
+        input_json (dict): The input program to parallelize
+        interproblem_distance (float): The distance between parallel problems
+        qpu_width (float): The field of view width for the program
+        qpu_height (float): The field of view height for the program
+        n_site_max (int): Maximum number of sites allowed for a program. 
+
+    Raises:
+        NotImplementedError: local detuning currently not supported. 
+
+    Returns:
+        Tuple[dict,dict]: first element is the parallelized program as a dict. 
+        The second element of the tuple is the batch mapping for post processing. 
+    """
 
     lattice = input_json["lattice"]
 
@@ -167,7 +265,24 @@ def parallelize_quera_json(input_json: dict,interproblem_distance,qpu_width,qpu_
     
     return output_json,batch_mapping
 
-def get_shots_quera_results(results_json: dict,batch_mapping=None,post_select=True):
+def get_shots_quera_results(
+    results_json: dict,
+    batch_mapping:Optional[dict]=None,
+    post_select:Optional[bool]=True
+) -> np.array:
+    """Get the shots out of a QuEra programming
+
+    Args:
+        results_json (dict): _description_
+        batch_mapping (dict, optional): 
+            The parallel mapping generated from some parallelization. Defaults to None.
+        post_select (bool, optional): 
+        Post select if atom fails to be sorted in the shot results. Defaults to True.
+
+    Returns:
+        np.array: The shot results stored as 1,0 in the rows of the array.
+        1 is the rydberg state and 0 is the ground state.
+    """
     # collecting QPU Data
     no_defects = lambda bits: np.all(bits==1) if post_select else True
     shots_list = results_json["shot_outputs"]

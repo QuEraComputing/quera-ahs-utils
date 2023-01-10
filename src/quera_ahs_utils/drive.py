@@ -8,9 +8,9 @@ from braket.ahs.pattern import Pattern
 from collections import Counter
 
 from typing import Dict, List, Tuple
-from braket.tasks.analog_hamiltonian_simulation_quantum_task_result import AnalogHamiltonianSimulationQuantumTaskResult
+from braket.tasks.analog_hamiltonian_simulation_quantum_task_result \
+    import AnalogHamiltonianSimulationQuantumTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
-
 
 
 __all__ = [
@@ -25,13 +25,14 @@ __all__ = [
     "concatenate_shift_list"
 ]
 
+
 def rabi_pulse(
     rabi_pulse_area: float, 
     omega_max: float,
     omega_slew_rate_max: float
 ) -> Tuple[List[float], List[float]]:
     """Get a time series for Rabi frequency with specified Rabi phase, maximum amplitude
-    and maximum slew rate
+        and maximum slew rate
 
         Args:
             rabi_pulse_area (float): Total area under the Rabi frequency time series

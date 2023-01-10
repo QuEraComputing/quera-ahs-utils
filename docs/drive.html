@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>quera_ahs_utils.drive API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>quera_ahs_utils.drive</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+
+from braket.timings.time_series import TimeSeries
+from braket.ahs.driving_field import DrivingField
+from braket.ahs.shifting_field import ShiftingField
+from braket.ahs.field import Field
+from braket.ahs.pattern import Pattern
+from collections import Counter
+
+from typing import Dict, List, Tuple
+from braket.tasks.analog_hamiltonian_simulation_quantum_task_result \
+    import AnalogHamiltonianSimulationQuantumTaskResult
+from braket.ahs.atom_arrangement import AtomArrangement
+
+
+__all__ = [
+    &#34;rabi_pulse&#34;,
+    &#34;get_drive&#34;,
+    &#34;get_shift&#34;,
+    &#34;constant_time_series&#34;,
+    &#34;concatenate_time_series&#34;,
+    &#34;concatenate_drives&#34;,
+    &#34;concatenate_shifts&#34;,
+    &#34;concatenate_drive_list&#34;,
+    &#34;concatenate_shift_list&#34;
+]
+
+
+def rabi_pulse(
+    rabi_pulse_area: float, 
+    omega_max: float,
+    omega_slew_rate_max: float
+) -&gt; Tuple[List[float], List[float]]:
+    &#34;&#34;&#34;Get a time series for Rabi frequency with specified Rabi phase, maximum amplitude
+        and maximum slew rate
+
+        Args:
+            rabi_pulse_area (float): Total area under the Rabi frequency time series
+            omega_max (float): The maximum amplitude 
+            omega_slew_rate_max (float): The maximum slew rate
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the time points and values
+                of the time series for the time dependent Rabi frequency
+
+        Notes: By Rabi phase, it means the integral of the amplitude of a time-dependent 
+            Rabi frequency, \int_0^T\Omega(t)dt, where T is the duration.
+    &#34;&#34;&#34;
+
+    phase_threshold = omega_max**2 / omega_slew_rate_max
+    if rabi_pulse_area &lt;= phase_threshold:
+        t_ramp = np.sqrt(rabi_pulse_area / omega_slew_rate_max)
+        t_plateau = 0
+    else:
+        t_ramp = omega_max / omega_slew_rate_max
+        t_plateau = (rabi_pulse_area / omega_max) - t_ramp
+    t_pules = 2 * t_ramp + t_plateau
+    time_points = [0, t_ramp, t_ramp + t_plateau, t_pules]
+    amplitude_values = [0, t_ramp * omega_slew_rate_max, t_ramp * omega_slew_rate_max, 0]
+    
+    return time_points, amplitude_values
+
+
+def get_drive(
+    times: List[float], 
+    amplitude_values: List[float], 
+    detuning_values: List[float], 
+    phase_values: List[float]
+) -&gt; DrivingField:
+    &#34;&#34;&#34;Get the driving field from a set of time points and values of the fields
+
+        Args:
+            times (List[float]): The time points of the driving field
+            amplitude_values (List[float]): The values of the amplitude
+            detuning_values (List[float]): The values of the detuning
+            phase_values (List[float]): The values of the phase
+
+        Returns:
+            DrivingField: The driving field obtained
+    &#34;&#34;&#34;
+
+    assert len(times) == len(amplitude_values)
+    assert len(times) == len(detuning_values)
+    assert len(times) == len(phase_values)
+    
+    amplitude = TimeSeries()
+    detuning = TimeSeries()  
+    phase = TimeSeries()    
+    
+    for t, amplitude_value, detuning_value, phase_value in zip(times, amplitude_values, detuning_values, phase_values):
+        amplitude.put(t, amplitude_value)
+        detuning.put(t, detuning_value)
+        phase.put(t, phase_value) 
+
+    drive = DrivingField(
+        amplitude=amplitude, 
+        detuning=detuning, 
+        phase=phase
+    )    
+    
+    return drive
+
+
+def get_shift(times: List[float], values: List[float], pattern: List[float]) -&gt; ShiftingField:
+    &#34;&#34;&#34;Get the shifting field from a set of time points, values and pattern
+
+        Args:
+            times (List[float]): The time points of the shifting field
+            values (List[float]): The values of the shifting field
+            pattern (List[float]): The pattern of the shifting field
+
+        Returns:
+            ShiftingField: The shifting field obtained
+    &#34;&#34;&#34;    
+    assert len(times) == len(values)    
+    
+    magnitude = TimeSeries()
+    for t, v in zip(times, values):
+        magnitude.put(t, v)
+    shift = ShiftingField(Field(magnitude, Pattern(pattern)))
+
+    return shift
+
+
+def constant_time_series(other_time_series: TimeSeries, constant: float=0.0) -&gt; TimeSeries:
+    &#34;&#34;&#34;Obtain a constant time series with the same time points as the given time series
+
+        Args:
+            other_time_series (TimeSeries): The given time series
+
+        Returns:
+            TimeSeries: A constant time series with the same time points as the given time series
+    &#34;&#34;&#34;
+    ts = TimeSeries()
+    for t in other_time_series.times():
+        ts.put(t, constant)
+    return ts
+
+
+def concatenate_time_series(time_series_1: TimeSeries, time_series_2: TimeSeries) -&gt; TimeSeries:
+    &#34;&#34;&#34;Concatenate two time series to a single time series
+
+        Args:
+            time_series_1 (TimeSeries): The first time series to be concatenated
+            time_series_2 (TimeSeries): The second time series to be concatenated
+
+        Returns:
+            TimeSeries: The concatenated time series
+
+    &#34;&#34;&#34;
+    assert time_series_1.values()[-1] == time_series_2.values()[0]
+    
+    duration_1 = time_series_1.times()[-1] - time_series_1.times()[0]
+    
+    new_time_series = TimeSeries()
+    new_times = time_series_1.times() + [t + duration_1 - time_series_2.times()[0] for t in time_series_2.times()[1:]]
+    new_values = time_series_1.values() + time_series_2.values()[1:]
+    for t, v in zip(new_times, new_values):
+        new_time_series.put(t, v)
+    
+    return new_time_series
+
+
+def concatenate_drives(drive_1: DrivingField, drive_2: DrivingField) -&gt; DrivingField:
+    &#34;&#34;&#34;Concatenate two driving fields to a single driving field
+
+        Args:
+            drive_1 (DrivingField): The first driving field to be concatenated
+            drive_2 (DrivingField): The second driving field to be concatenated
+
+        Returns:
+            DrivingField: The concatenated driving field
+    &#34;&#34;&#34;    
+    return DrivingField(
+        amplitude=concatenate_time_series(drive_1.amplitude.time_series, drive_2.amplitude.time_series),
+        detuning=concatenate_time_series(drive_1.detuning.time_series, drive_2.detuning.time_series),
+        phase=concatenate_time_series(drive_1.phase.time_series, drive_2.phase.time_series)
+    )
+
+
+def concatenate_shifts(shift_1: ShiftingField, shift_2: ShiftingField) -&gt; ShiftingField:
+    &#34;&#34;&#34;Concatenate two driving fields to a single driving field
+
+        Args:
+            shift_1 (ShiftingField): The first shifting field to be concatenated
+            shift_2 (ShiftingField): The second shifting field to be concatenated
+
+        Returns:
+            ShiftingField: The concatenated shifting field
+    &#34;&#34;&#34;        
+    assert shift_1.magnitude.pattern.series == shift_2.magnitude.pattern.series
+    
+    new_magnitude = concatenate_time_series(shift_1.magnitude.time_series, shift_2.magnitude.time_series)
+    return ShiftingField(Field(new_magnitude, shift_1.magnitude.pattern))
+
+
+def concatenate_drive_list(drive_list: List[DrivingField]) -&gt; DrivingField:
+    &#34;&#34;&#34;Concatenate a list of driving fields to a single driving field
+
+        Args:
+            drive_list (List[DrivingField]): The list of driving fields to be concatenated
+
+        Returns:
+            DrivingField: The concatenated driving field
+    &#34;&#34;&#34;        
+    drive = drive_list[0]
+    for dr in drive_list[1:]:
+        drive = concatenate_drives(drive, dr)
+    return drive    
+
+
+def concatenate_shift_list(shift_list: List[ShiftingField]) -&gt; ShiftingField:
+    &#34;&#34;&#34;Concatenate a list of shifting fields to a single driving field
+
+        Args:
+            shift_list (List[ShiftingField]): The list of shifting fields to be concatenated
+
+        Returns:
+            ShiftingField: The concatenated shifting field
+    &#34;&#34;&#34;            
+    shift = shift_list[0]
+    for sf in shift_list[1:]:
+        shift = concatenate_shifts(shift, sf)
+    return shift</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="quera_ahs_utils.drive.concatenate_drive_list"><code class="name flex">
+<span>def <span class="ident">concatenate_drive_list</span></span>(<span>drive_list: List[braket.ahs.driving_field.DrivingField]) ‑> braket.ahs.driving_field.DrivingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate a list of driving fields to a single driving field</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>drive_list</code></strong> :&ensp;<code>List[DrivingField]</code></dt>
+<dd>The list of driving fields to be concatenated</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DrivingField</code></dt>
+<dd>The concatenated driving field</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def concatenate_drive_list(drive_list: List[DrivingField]) -&gt; DrivingField:
+    &#34;&#34;&#34;Concatenate a list of driving fields to a single driving field
+
+        Args:
+            drive_list (List[DrivingField]): The list of driving fields to be concatenated
+
+        Returns:
+            DrivingField: The concatenated driving field
+    &#34;&#34;&#34;        
+    drive = drive_list[0]
+    for dr in drive_list[1:]:
+        drive = concatenate_drives(drive, dr)
+    return drive    </code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.concatenate_drives"><code class="name flex">
+<span>def <span class="ident">concatenate_drives</span></span>(<span>drive_1: braket.ahs.driving_field.DrivingField, drive_2: braket.ahs.driving_field.DrivingField) ‑> braket.ahs.driving_field.DrivingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate two driving fields to a single driving field</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>drive_1</code></strong> :&ensp;<code>DrivingField</code></dt>
+<dd>The first driving field to be concatenated</dd>
+<dt><strong><code>drive_2</code></strong> :&ensp;<code>DrivingField</code></dt>
+<dd>The second driving field to be concatenated</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DrivingField</code></dt>
+<dd>The concatenated driving field</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def concatenate_drives(drive_1: DrivingField, drive_2: DrivingField) -&gt; DrivingField:
+    &#34;&#34;&#34;Concatenate two driving fields to a single driving field
+
+        Args:
+            drive_1 (DrivingField): The first driving field to be concatenated
+            drive_2 (DrivingField): The second driving field to be concatenated
+
+        Returns:
+            DrivingField: The concatenated driving field
+    &#34;&#34;&#34;    
+    return DrivingField(
+        amplitude=concatenate_time_series(drive_1.amplitude.time_series, drive_2.amplitude.time_series),
+        detuning=concatenate_time_series(drive_1.detuning.time_series, drive_2.detuning.time_series),
+        phase=concatenate_time_series(drive_1.phase.time_series, drive_2.phase.time_series)
+    )</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.concatenate_shift_list"><code class="name flex">
+<span>def <span class="ident">concatenate_shift_list</span></span>(<span>shift_list: List[braket.ahs.shifting_field.ShiftingField]) ‑> braket.ahs.shifting_field.ShiftingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate a list of shifting fields to a single driving field</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>shift_list</code></strong> :&ensp;<code>List[ShiftingField]</code></dt>
+<dd>The list of shifting fields to be concatenated</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ShiftingField</code></dt>
+<dd>The concatenated shifting field</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def concatenate_shift_list(shift_list: List[ShiftingField]) -&gt; ShiftingField:
+    &#34;&#34;&#34;Concatenate a list of shifting fields to a single driving field
+
+        Args:
+            shift_list (List[ShiftingField]): The list of shifting fields to be concatenated
+
+        Returns:
+            ShiftingField: The concatenated shifting field
+    &#34;&#34;&#34;            
+    shift = shift_list[0]
+    for sf in shift_list[1:]:
+        shift = concatenate_shifts(shift, sf)
+    return shift</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.concatenate_shifts"><code class="name flex">
+<span>def <span class="ident">concatenate_shifts</span></span>(<span>shift_1: braket.ahs.shifting_field.ShiftingField, shift_2: braket.ahs.shifting_field.ShiftingField) ‑> braket.ahs.shifting_field.ShiftingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate two driving fields to a single driving field</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>shift_1</code></strong> :&ensp;<code>ShiftingField</code></dt>
+<dd>The first shifting field to be concatenated</dd>
+<dt><strong><code>shift_2</code></strong> :&ensp;<code>ShiftingField</code></dt>
+<dd>The second shifting field to be concatenated</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ShiftingField</code></dt>
+<dd>The concatenated shifting field</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def concatenate_shifts(shift_1: ShiftingField, shift_2: ShiftingField) -&gt; ShiftingField:
+    &#34;&#34;&#34;Concatenate two driving fields to a single driving field
+
+        Args:
+            shift_1 (ShiftingField): The first shifting field to be concatenated
+            shift_2 (ShiftingField): The second shifting field to be concatenated
+
+        Returns:
+            ShiftingField: The concatenated shifting field
+    &#34;&#34;&#34;        
+    assert shift_1.magnitude.pattern.series == shift_2.magnitude.pattern.series
+    
+    new_magnitude = concatenate_time_series(shift_1.magnitude.time_series, shift_2.magnitude.time_series)
+    return ShiftingField(Field(new_magnitude, shift_1.magnitude.pattern))</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.concatenate_time_series"><code class="name flex">
+<span>def <span class="ident">concatenate_time_series</span></span>(<span>time_series_1: braket.timings.time_series.TimeSeries, time_series_2: braket.timings.time_series.TimeSeries) ‑> braket.timings.time_series.TimeSeries</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate two time series to a single time series</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>time_series_1</code></strong> :&ensp;<code>TimeSeries</code></dt>
+<dd>The first time series to be concatenated</dd>
+<dt><strong><code>time_series_2</code></strong> :&ensp;<code>TimeSeries</code></dt>
+<dd>The second time series to be concatenated</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>TimeSeries</code></dt>
+<dd>The concatenated time series</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def concatenate_time_series(time_series_1: TimeSeries, time_series_2: TimeSeries) -&gt; TimeSeries:
+    &#34;&#34;&#34;Concatenate two time series to a single time series
+
+        Args:
+            time_series_1 (TimeSeries): The first time series to be concatenated
+            time_series_2 (TimeSeries): The second time series to be concatenated
+
+        Returns:
+            TimeSeries: The concatenated time series
+
+    &#34;&#34;&#34;
+    assert time_series_1.values()[-1] == time_series_2.values()[0]
+    
+    duration_1 = time_series_1.times()[-1] - time_series_1.times()[0]
+    
+    new_time_series = TimeSeries()
+    new_times = time_series_1.times() + [t + duration_1 - time_series_2.times()[0] for t in time_series_2.times()[1:]]
+    new_values = time_series_1.values() + time_series_2.values()[1:]
+    for t, v in zip(new_times, new_values):
+        new_time_series.put(t, v)
+    
+    return new_time_series</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.constant_time_series"><code class="name flex">
+<span>def <span class="ident">constant_time_series</span></span>(<span>other_time_series: braket.timings.time_series.TimeSeries, constant: float = 0.0) ‑> braket.timings.time_series.TimeSeries</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Obtain a constant time series with the same time points as the given time series</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>other_time_series</code></strong> :&ensp;<code>TimeSeries</code></dt>
+<dd>The given time series</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>TimeSeries</code></dt>
+<dd>A constant time series with the same time points as the given time series</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def constant_time_series(other_time_series: TimeSeries, constant: float=0.0) -&gt; TimeSeries:
+    &#34;&#34;&#34;Obtain a constant time series with the same time points as the given time series
+
+        Args:
+            other_time_series (TimeSeries): The given time series
+
+        Returns:
+            TimeSeries: A constant time series with the same time points as the given time series
+    &#34;&#34;&#34;
+    ts = TimeSeries()
+    for t in other_time_series.times():
+        ts.put(t, constant)
+    return ts</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.get_drive"><code class="name flex">
+<span>def <span class="ident">get_drive</span></span>(<span>times: List[float], amplitude_values: List[float], detuning_values: List[float], phase_values: List[float]) ‑> braket.ahs.driving_field.DrivingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the driving field from a set of time points and values of the fields</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>times</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The time points of the driving field</dd>
+<dt><strong><code>amplitude_values</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The values of the amplitude</dd>
+<dt><strong><code>detuning_values</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The values of the detuning</dd>
+<dt><strong><code>phase_values</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The values of the phase</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DrivingField</code></dt>
+<dd>The driving field obtained</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_drive(
+    times: List[float], 
+    amplitude_values: List[float], 
+    detuning_values: List[float], 
+    phase_values: List[float]
+) -&gt; DrivingField:
+    &#34;&#34;&#34;Get the driving field from a set of time points and values of the fields
+
+        Args:
+            times (List[float]): The time points of the driving field
+            amplitude_values (List[float]): The values of the amplitude
+            detuning_values (List[float]): The values of the detuning
+            phase_values (List[float]): The values of the phase
+
+        Returns:
+            DrivingField: The driving field obtained
+    &#34;&#34;&#34;
+
+    assert len(times) == len(amplitude_values)
+    assert len(times) == len(detuning_values)
+    assert len(times) == len(phase_values)
+    
+    amplitude = TimeSeries()
+    detuning = TimeSeries()  
+    phase = TimeSeries()    
+    
+    for t, amplitude_value, detuning_value, phase_value in zip(times, amplitude_values, detuning_values, phase_values):
+        amplitude.put(t, amplitude_value)
+        detuning.put(t, detuning_value)
+        phase.put(t, phase_value) 
+
+    drive = DrivingField(
+        amplitude=amplitude, 
+        detuning=detuning, 
+        phase=phase
+    )    
+    
+    return drive</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.get_shift"><code class="name flex">
+<span>def <span class="ident">get_shift</span></span>(<span>times: List[float], values: List[float], pattern: List[float]) ‑> braket.ahs.shifting_field.ShiftingField</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the shifting field from a set of time points, values and pattern</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>times</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The time points of the shifting field</dd>
+<dt><strong><code>values</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The values of the shifting field</dd>
+<dt><strong><code>pattern</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>The pattern of the shifting field</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ShiftingField</code></dt>
+<dd>The shifting field obtained</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_shift(times: List[float], values: List[float], pattern: List[float]) -&gt; ShiftingField:
+    &#34;&#34;&#34;Get the shifting field from a set of time points, values and pattern
+
+        Args:
+            times (List[float]): The time points of the shifting field
+            values (List[float]): The values of the shifting field
+            pattern (List[float]): The pattern of the shifting field
+
+        Returns:
+            ShiftingField: The shifting field obtained
+    &#34;&#34;&#34;    
+    assert len(times) == len(values)    
+    
+    magnitude = TimeSeries()
+    for t, v in zip(times, values):
+        magnitude.put(t, v)
+    shift = ShiftingField(Field(magnitude, Pattern(pattern)))
+
+    return shift</code></pre>
+</details>
+</dd>
+<dt id="quera_ahs_utils.drive.rabi_pulse"><code class="name flex">
+<span>def <span class="ident">rabi_pulse</span></span>(<span>rabi_pulse_area: float, omega_max: float, omega_slew_rate_max: float) ‑> Tuple[List[float], List[float]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a time series for Rabi frequency with specified Rabi phase, maximum amplitude
+and maximum slew rate</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>rabi_pulse_area</code></strong> :&ensp;<code>float</code></dt>
+<dd>Total area under the Rabi frequency time series</dd>
+<dt><strong><code>omega_max</code></strong> :&ensp;<code>float</code></dt>
+<dd>The maximum amplitude </dd>
+<dt><strong><code>omega_slew_rate_max</code></strong> :&ensp;<code>float</code></dt>
+<dd>The maximum slew rate</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[List[float], List[float]]</code></dt>
+<dd>A tuple containing the time points and values
+of the time series for the time dependent Rabi frequency</dd>
+</dl>
+<p>Notes: By Rabi phase, it means the integral of the amplitude of a time-dependent
+Rabi frequency, \int_0^T\Omega(t)dt, where T is the duration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rabi_pulse(
+    rabi_pulse_area: float, 
+    omega_max: float,
+    omega_slew_rate_max: float
+) -&gt; Tuple[List[float], List[float]]:
+    &#34;&#34;&#34;Get a time series for Rabi frequency with specified Rabi phase, maximum amplitude
+        and maximum slew rate
+
+        Args:
+            rabi_pulse_area (float): Total area under the Rabi frequency time series
+            omega_max (float): The maximum amplitude 
+            omega_slew_rate_max (float): The maximum slew rate
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the time points and values
+                of the time series for the time dependent Rabi frequency
+
+        Notes: By Rabi phase, it means the integral of the amplitude of a time-dependent 
+            Rabi frequency, \int_0^T\Omega(t)dt, where T is the duration.
+    &#34;&#34;&#34;
+
+    phase_threshold = omega_max**2 / omega_slew_rate_max
+    if rabi_pulse_area &lt;= phase_threshold:
+        t_ramp = np.sqrt(rabi_pulse_area / omega_slew_rate_max)
+        t_plateau = 0
+    else:
+        t_ramp = omega_max / omega_slew_rate_max
+        t_plateau = (rabi_pulse_area / omega_max) - t_ramp
+    t_pules = 2 * t_ramp + t_plateau
+    time_points = [0, t_ramp, t_ramp + t_plateau, t_pules]
+    amplitude_values = [0, t_ramp * omega_slew_rate_max, t_ramp * omega_slew_rate_max, 0]
+    
+    return time_points, amplitude_values</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="quera_ahs_utils" href="index.html">quera_ahs_utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="quera_ahs_utils.drive.concatenate_drive_list" href="#quera_ahs_utils.drive.concatenate_drive_list">concatenate_drive_list</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.concatenate_drives" href="#quera_ahs_utils.drive.concatenate_drives">concatenate_drives</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.concatenate_shift_list" href="#quera_ahs_utils.drive.concatenate_shift_list">concatenate_shift_list</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.concatenate_shifts" href="#quera_ahs_utils.drive.concatenate_shifts">concatenate_shifts</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.concatenate_time_series" href="#quera_ahs_utils.drive.concatenate_time_series">concatenate_time_series</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.constant_time_series" href="#quera_ahs_utils.drive.constant_time_series">constant_time_series</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.get_drive" href="#quera_ahs_utils.drive.get_drive">get_drive</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.get_shift" href="#quera_ahs_utils.drive.get_shift">get_shift</a></code></li>
+<li><code><a title="quera_ahs_utils.drive.rabi_pulse" href="#quera_ahs_utils.drive.rabi_pulse">rabi_pulse</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

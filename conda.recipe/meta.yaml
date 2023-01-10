@@ -1,0 +1,34 @@
+{% set name = "quera-ahs-utils" %}
+{% set version = "0.0.3" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 98b6635ad4be90dd8380e676829099beab45703ba1bca6c23e30fb811c4811ec
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+about:
+  home: The package home page
+  license: UNKNOWN
+  license_family: OTHER
+  license_file: 
+  summary: "Various tools to interact with Braket Analog Hamiltonian Computing"
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - your-github-id-here
