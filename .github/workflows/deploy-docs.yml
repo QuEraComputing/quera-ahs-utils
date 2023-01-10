@@ -5,14 +5,10 @@ on:
     branches:
       - main
     tags: '*'
-  pull_request:
-    branches:
-      - main
-    types: [opened]
 
 jobs:
   # Build job
-  test_and_build:
+  test_and_deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -38,7 +34,9 @@ jobs:
       run: pdoc --html quera_ahs_utils 
 
     - name: Move assests
-      run: mv ${{github.workspace}}/html/quera_ahs_utils/* ${{github.workspace}}/docs/
+      run: |
+        mkdir ${{github.workspace}}/docs
+        mv ${{github.workspace}}/html/quera_ahs_utils/* ${{github.workspace}}/docs/
     
     - name: Commit changes
       uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
