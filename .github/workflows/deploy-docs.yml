@@ -37,8 +37,9 @@ jobs:
 
     - name: Create archive
       run: |
-       - mkdir _site/
-       - tar -czvf _site/github-pages.tar.gz ./html
+        mkdir _site/
+        tar -czvf _site/github-pages.tar.gz ./html
+        
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1
 
