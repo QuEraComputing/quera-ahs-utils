@@ -4,39 +4,40 @@ on:
     branches:
       - main
 
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: python setup
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
 
-    - name: Checking pip 
-      run:  python3 -m ensurepip --upgrade
+# jobs:
+#   publish:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: python setup
+#       uses: actions/setup-python@v4
+#       with:
+#         python-version: '3.9'
 
-    - name: Install
-      run: pip install ${{github.workspace}}
+#     - name: Checking pip 
+#       run:  python3 -m ensurepip --upgrade
 
-    - name: Test
-      working-directory: ${{github.workspace}}/test
-      run: python3 -m unittest 
+#     - name: Install
+#       run: pip install ${{github.workspace}}
 
-    - name: Build Egg
-      run: python3 -m pip install --upgrade build && python3 -m build
+#     - name: Test
+#       working-directory: ${{github.workspace}}/test
+#       run: python3 -m unittest 
 
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+#     - name: Build Egg
+#       run: python3 -m pip install --upgrade build && python3 -m build
 
-    - name: Get Version
-      run: echo VERSION="$(python3 setup.py --version)" >> $GITHUB_ENV
+#     - name: Publish package
+#       uses: pypa/gh-action-pypi-publish@release/v1
+#       with:
+#         password: ${{ secrets.PYPI_API_TOKEN }}
+
+#     - name: Get Version
+#       run: echo VERSION="$(python3 setup.py --version)" >> $GITHUB_ENV
       
-    - name: Tag Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ env.VERSION }}
+#     - name: Tag Release
+#       uses: softprops/action-gh-release@v1
+#       with:
+#         tag_name: ${{ env.VERSION }}
 

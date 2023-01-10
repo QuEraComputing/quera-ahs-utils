@@ -40,7 +40,7 @@ jobs:
     - name: Create archive
       run: |
         mkdir _site/
-        tar -czvf _site/github-pages.tar.gz ./html
+        tar -czvf _site/github-pages.tar.gz ./html/quera_ahs_utils
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1
