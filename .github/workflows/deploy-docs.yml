@@ -5,14 +5,10 @@ on:
     branches:
       - main
     tags: '*'
-  pull_request:
-    branches:
-      - main
-    types: [opened]
 
 jobs:
   # Build job
-  test_and_build:
+  test_and_deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -37,33 +33,13 @@ jobs:
     - name: Build docs
       run: pdoc --html quera_ahs_utils 
 
-    - name: Create archive
+    - name: Move assests
       run: |
-        mkdir _site/
-        tar -czvf _site/github-pages.tar.gz ./html/quera_ahs_utils
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-
-
-  # Deploy job
-  deploy:
-    # Add a dependency to the build job
-    needs: test_and_build
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+        mkdir ${{github.workspace}}/docs
+        mv ${{github.workspace}}/html/quera_ahs_utils/* ${{github.workspace}}/docs/
+    
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+      with:
+        add: '${{github.workspace}}/docs/'
+        message: 'updating docs/'
