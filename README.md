@@ -1,2 +1,22 @@
-# aws-utilities
-various functions that can be used to help out with braket python SDK
+# quera-ahs-utils
+This python package is a collection of tools that can be used to program QuEra's nuetral **atom analog quantum simulator** (**ahs**). These tools are primarily targeted towards the usage of [Amazon's Braket quantum computing service](https://aws.amazon.com/braket/) . The Braket python software development kit can be found [here](https://github.com/aws/amazon-braket-sdk-python) along with some examples of how to use their service through a collection of examples from both [Braket](https://github.com/aws/amazon-braket-examples/tree/main/examples/analog_hamiltonian_simulation) and [QuEra](https://github.com/QuEraComputing/QuEra-braket-examples). 
+
+We would be remiss not to advertise our own Julia SDK for programming QuEra's **ahs**, [Bloqade](https://queracomputing.github.io/Bloqade.jl/dev/). Bloqade is a powerful [Julia](https://julialang.org/) package tool for programming and modeling neutral atom quantum computing. 
+
+## Installation
+The package can be installed via pip:
+
+    pip install quera-ahs-utils
+
+## Package contents
+
+**quera-ahs-utils** is broken up into 5 modules each dealing with specific tools summarized in the table below:
+|              module             |                                                       description                                                      |
+|:-------------------------------:|:----------------------------------------------------------------------------------------------------------------------:|
+| **quera_ahs_utils**.analysis    | A collection of functions to do basic analysis on shot results                                                         |
+| **quera_ahs_utils**.drive       | A collection of functions to easily generate different types of driving hamiltonians                                   |
+| **quera_ahs_utils**.ir          | A collection of functions to transform between QuEra and Braket program representations                                |
+| **quera_ahs_utils**.parallelize | A collection of functions to transform small jobs into a parallel set of jobs to maximize the field of view of the QPU |
+| **quera_ahs_utils**.plotting    | A collection of functions to help visualize both **ahs** programs as well as its results.                              |
+
+A full module reference is currently in progress. 
