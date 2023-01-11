@@ -164,18 +164,18 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
 
             register (AtomArrangement): The register used in creating the Hamiltonian.
 
-            with_labels (Boolean): Choose if each atom's index is displayed over the atom itself in the resulting figure. 
+            with_labels (Boolean, optional): Choose if each atom's index is displayed over the atom itself in the resulting figure. 
                 Default is True.
 
-            custom_axes (matplotlib.axes.Axes): If argument is given, the plot will use the supplied
+            custom_axes (matplotlib.axes.Axes, optional): If argument is given, the plot will use the supplied
                 axis for displaying data and the function will not return anything. Otherwise, a new matplotlib Figure and
                 Axes will be generated and returned. Default is None. 
 
-            cmap (matplotlib.colors.Colormap): Defines the colormap that the plot uses to map the average density values
+            cmap (matplotlib.colors.Colormap, optional): Defines the colormap that the plot uses to map the average density values
                 to the colors of each plotted atom.
                 
         Returns:
-            Tuple[Optional[Figure],Axes]]: returns the Figure and the Axes object used to create the plot if `custom_axes`
+            Tuple[Optional[matplotlib.figure.Figure],matplotlib.axes.Axes]]: returns the Figure and the Axes object used to create the plot if `custom_axes`
                 is not given, otherwise the function returns None
     """
     
