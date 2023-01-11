@@ -53,10 +53,9 @@ def show_register(
 
         Args:
             register (AtomArrangement): A given register
-            blockade_radius (float): The blockade radius for the register. Default is 0
-            what_to_draw (str): Either &#34;bond&#34; or &#34;circle&#34; to indicate the blockade region. 
-                Default is &#34;bond&#34;
-            show_atom_index (bool): Whether showing the indices of the atoms. Default is True
+            blockade_radius (float): Default is 0. The blockade radius for the register.
+            what_to_draw (str): Default is &#34;bond&#34;. Either &#34;bond&#34; or &#34;circle&#34; to indicate the blockade region. 
+            show_atom_index (bool): Default is True. Whether showing the indices of the atoms.
         
     &#34;&#34;&#34;
     filled_sites = [site.coordinate for site in register if site.site_type == SiteType.FILLED]
@@ -91,7 +90,7 @@ def show_global_drive(drive, axes=None, **plot_ops):
     &#34;&#34;&#34;Plot the driving field
         Args:
             drive (DrivingField): The driving field to be plot
-            axes: matplotlib axis to draw on
+            axes: Default is None. matplotlib axis to draw on
             **plot_ops: options passed to matplitlib.pyplot.plot
     &#34;&#34;&#34;   
 
@@ -502,7 +501,7 @@ from which the aggregated state counts are obtained</dd>
 <dt><strong><code>drive</code></strong> :&ensp;<code>DrivingField</code></dt>
 <dd>The driving field to be plot</dd>
 <dt><strong><code>axes</code></strong></dt>
-<dd>matplotlib axis to draw on</dd>
+<dd>Default is None. matplotlib axis to draw on</dd>
 <dt><strong><code>**plot_ops</code></strong></dt>
 <dd>options passed to matplitlib.pyplot.plot</dd>
 </dl></div>
@@ -514,7 +513,7 @@ from which the aggregated state counts are obtained</dd>
     &#34;&#34;&#34;Plot the driving field
         Args:
             drive (DrivingField): The driving field to be plot
-            axes: matplotlib axis to draw on
+            axes: Default is None. matplotlib axis to draw on
             **plot_ops: options passed to matplitlib.pyplot.plot
     &#34;&#34;&#34;   
 
@@ -580,12 +579,11 @@ from which the aggregated state counts are obtained</dd>
 <dt><strong><code>register</code></strong> :&ensp;<code>AtomArrangement</code></dt>
 <dd>A given register</dd>
 <dt><strong><code>blockade_radius</code></strong> :&ensp;<code>float</code></dt>
-<dd>The blockade radius for the register. Default is 0</dd>
+<dd>Default is 0. The blockade radius for the register.</dd>
 <dt><strong><code>what_to_draw</code></strong> :&ensp;<code>str</code></dt>
-<dd>Either "bond" or "circle" to indicate the blockade region.
-Default is "bond"</dd>
+<dd>Default is "bond". Either "bond" or "circle" to indicate the blockade region. </dd>
 <dt><strong><code>show_atom_index</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether showing the indices of the atoms. Default is True</dd>
+<dd>Default is True. Whether showing the indices of the atoms.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -601,10 +599,9 @@ Default is "bond"</dd>
 
         Args:
             register (AtomArrangement): A given register
-            blockade_radius (float): The blockade radius for the register. Default is 0
-            what_to_draw (str): Either &#34;bond&#34; or &#34;circle&#34; to indicate the blockade region. 
-                Default is &#34;bond&#34;
-            show_atom_index (bool): Whether showing the indices of the atoms. Default is True
+            blockade_radius (float): Default is 0. The blockade radius for the register.
+            what_to_draw (str): Default is &#34;bond&#34;. Either &#34;bond&#34; or &#34;circle&#34; to indicate the blockade region. 
+            show_atom_index (bool): Default is True. Whether showing the indices of the atoms.
         
     &#34;&#34;&#34;
     filled_sites = [site.coordinate for site in register if site.site_type == SiteType.FILLED]
