@@ -173,6 +173,10 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
 
             cmap (matplotlib.colors.Colormap): Defines the colormap that the plot uses to map the average density values
                 to the colors of each plotted atom.
+                
+        Returns:
+            Tuple[Optional[Figure],Axes]]: returns the Figure and the Axes object used to create the plot if `custom_axes`
+                is not given, otherwise the function returns None
     """
     
     # get atom coordinates
@@ -194,9 +198,11 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
     
     # construct plot
     if custom_axes is None:
+        return_fig = True
         fig, ax = plt.subplots()
     else:
         ax = custom_axes
+        return_fig = False
     
     nx.draw(g, 
             pos,
@@ -236,4 +242,9 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
     cbar_label = "Rydberg Density"
         
     plt.colorbar(sm, ax=ax, label=cbar_label)
+    
+    if return_fig:
+        return fig,ax
+    else:
+        return None,ax
 
