@@ -167,12 +167,13 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
             with_labels (Boolean): Default is True. Choose if each atom's index is displayed over the atom itself in the resulting figure. 
                 Default is True.
 
-            custom_axes (matplotlib.axes.Axes, optional): If argument is given, the plot will use the supplied
+            custom_axes (matplotlib.axes.Axes): Default is None. If argument is given, the plot will use the supplied
                 axis for displaying data and the function will not return anything. Otherwise, a new matplotlib Figure and
-                Axes will be generated and returned. Default is None. 
+                Axes will be generated and returned.
 
-            cmap (matplotlib.colors.Colormap, optional): Defines the colormap that the plot uses to map the average density values
-                to the colors of each plotted atom.
+            cmap (matplotlib.colors.Colormap): Default is None. Defines the colormap that the plot uses to map the average density values
+                to the colors of each plotted atom. When Default value is used a the resulting plot uses a Colormap that is given by 
+                `matplotlib.pyplot.cm.bwr` which is gradient from red to blue with white in the middle.  
                 
         Returns:
             Tuple[Optional[matplotlib.figure.Figure],matplotlib.axes.Axes]]: returns the Figure and the Axes object used to create the plot if `custom_axes`

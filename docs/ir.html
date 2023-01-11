@@ -53,6 +53,7 @@ def to_json_file(js:dict,json_filename:str,**json_options) -&gt; NoReturn:
     Args:
         js (dict): data to be serialaized.
         json_filename (str): filename to output to.
+        **json_options: options that get passed to the json serializer as `json.dump(...,**json_options)`
         
     &#34;&#34;&#34;
     with open(json_filename,&#34;w&#34;) as IO:
@@ -375,6 +376,8 @@ as the second argument.</dd>
 <dd>data to be serialaized.</dd>
 <dt><strong><code>json_filename</code></strong> :&ensp;<code>str</code></dt>
 <dd>filename to output to.</dd>
+<dt><strong><code>**json_options</code></strong></dt>
+<dd>options that get passed to the json serializer as <code>json.dump(...,**json_options)</code></dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -386,6 +389,7 @@ as the second argument.</dd>
     Args:
         js (dict): data to be serialaized.
         json_filename (str): filename to output to.
+        **json_options: options that get passed to the json serializer as `json.dump(...,**json_options)`
         
     &#34;&#34;&#34;
     with open(json_filename,&#34;w&#34;) as IO:
