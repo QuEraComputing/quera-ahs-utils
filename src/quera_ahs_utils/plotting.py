@@ -27,10 +27,9 @@ def show_register(
 
         Args:
             register (AtomArrangement): A given register
-            blockade_radius (float): The blockade radius for the register. Default is 0
-            what_to_draw (str): Either "bond" or "circle" to indicate the blockade region. 
-                Default is "bond"
-            show_atom_index (bool): Whether showing the indices of the atoms. Default is True
+            blockade_radius (float): Default is 0. The blockade radius for the register.
+            what_to_draw (str): Default is "bond". Either "bond" or "circle" to indicate the blockade region. 
+            show_atom_index (bool): Default is True. Whether showing the indices of the atoms.
         
     """
     filled_sites = [site.coordinate for site in register if site.site_type == SiteType.FILLED]
@@ -65,7 +64,7 @@ def show_global_drive(drive, axes=None, **plot_ops):
     """Plot the driving field
         Args:
             drive (DrivingField): The driving field to be plot
-            axes: matplotlib axis to draw on
+            axes: Default is None. matplotlib axis to draw on
             **plot_ops: options passed to matplitlib.pyplot.plot
     """   
 
