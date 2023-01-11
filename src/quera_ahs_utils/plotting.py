@@ -164,7 +164,7 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
 
             register (AtomArrangement): The register used in creating the Hamiltonian.
 
-            with_labels (Boolean, optional): Choose if each atom's index is displayed over the atom itself in the resulting figure. 
+            with_labels (Boolean): Default is True. Choose if each atom's index is displayed over the atom itself in the resulting figure. 
                 Default is True.
 
             custom_axes (matplotlib.axes.Axes, optional): If argument is given, the plot will use the supplied
