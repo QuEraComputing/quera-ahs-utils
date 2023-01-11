@@ -29,7 +29,7 @@ def show_register(
             register (AtomArrangement): A given register
             blockade_radius (float): Default is 0. The blockade radius for the register.
             what_to_draw (str): Default is "bond". Either "bond" or "circle" to indicate the blockade region. 
-            show_atom_index (bool): Default is True. Whether showing the indices of the atoms.
+            show_atom_index (bool): Default is True. Choose if each atom's index is displayed over the atom itself in the resulting figure. 
         
     """
     filled_sites = [site.coordinate for site in register if site.site_type == SiteType.FILLED]
