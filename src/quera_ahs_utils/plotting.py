@@ -27,10 +27,9 @@ def show_register(
 
         Args:
             register (AtomArrangement): A given register
-            blockade_radius (float): The blockade radius for the register. Default is 0
-            what_to_draw (str): Either "bond" or "circle" to indicate the blockade region. 
-                Default is "bond"
-            show_atom_index (bool): Whether showing the indices of the atoms. Default is True
+            blockade_radius (float): Default is 0. The blockade radius for the register.
+            what_to_draw (str): Default is "bond". Either "bond" or "circle" to indicate the blockade region. 
+            show_atom_index (bool): Default is True. Choose if each atom's index is displayed over the atom itself in the resulting figure. 
         
     """
     filled_sites = [site.coordinate for site in register if site.site_type == SiteType.FILLED]
@@ -65,7 +64,7 @@ def show_global_drive(drive, axes=None, **plot_ops):
     """Plot the driving field
         Args:
             drive (DrivingField): The driving field to be plot
-            axes: matplotlib axis to draw on
+            axes: Default is None. matplotlib axis to draw on
             **plot_ops: options passed to matplitlib.pyplot.plot
     """   
 
@@ -164,15 +163,20 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
 
             register (AtomArrangement): The register used in creating the Hamiltonian.
 
-            with_labels (Boolean): Choose if each atom's index is displayed over the atom itself in the resulting figure. 
+            with_labels (Boolean): Default is True. Choose if each atom's index is displayed over the atom itself in the resulting figure. 
                 Default is True.
 
-            custom_axes (matplotlib.axes.Axes): If argument is given, the plot will use the supplied
+            custom_axes (matplotlib.axes.Axes): Default is None. If argument is given, the plot will use the supplied
                 axis for displaying data and the function will not return anything. Otherwise, a new matplotlib Figure and
-                Axes will be generated and returned. Default is None. 
+                Axes will be generated and returned.
 
-            cmap (matplotlib.colors.Colormap): Defines the colormap that the plot uses to map the average density values
-                to the colors of each plotted atom.
+            cmap (matplotlib.colors.Colormap): Default is None. Defines the colormap that the plot uses to map the average density values
+                to the colors of each plotted atom. When Default value is used a the resulting plot uses a Colormap that is given by 
+                `matplotlib.pyplot.cm.bwr` which is gradient from red to blue with white in the middle.  
+                
+        Returns:
+            Tuple[Optional[matplotlib.figure.Figure],matplotlib.axes.Axes]]: returns the Figure and the Axes object used to create the plot if `custom_axes`
+                is not given, otherwise the function returns None
     """
     
     # get atom coordinates
@@ -194,9 +198,11 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
     
     # construct plot
     if custom_axes is None:
+        return_fig = True
         fig, ax = plt.subplots()
     else:
         ax = custom_axes
+        return_fig = False
     
     nx.draw(g, 
             pos,
@@ -236,4 +242,9 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
     cbar_label = "Rydberg Density"
         
     plt.colorbar(sm, ax=ax, label=cbar_label)
+    
+    if return_fig:
+        return fig,ax
+    else:
+        return None,ax
 

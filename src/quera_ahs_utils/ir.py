@@ -27,6 +27,7 @@ def to_json_file(js:dict,json_filename:str,**json_options) -> NoReturn:
     Args:
         js (dict): data to be serialaized.
         json_filename (str): filename to output to.
+        **json_options: options that get passed to the json serializer as `json.dump(...,**json_options)`
         
     """
     with open(json_filename,"w") as IO:
