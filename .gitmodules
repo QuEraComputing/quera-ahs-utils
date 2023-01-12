@@ -1,3 +1,0 @@
-[submodule "conda.recipe"]
-	path = conda.recipe
-	url = git@github.com:QuEraComputing/quera-ahs-utils-conda.recipe.git
