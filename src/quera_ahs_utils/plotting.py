@@ -309,8 +309,8 @@ def visualize_UDG(positions,
     
     pos = {tuple(a):a for a in positions}
     
-    if hasattr(color_nodes,'__len__'):
-        color_nodes = {tuple(positions[i]):color_nodes[i] for i in range(N)}
+    color_nodes = list(color_nodes)
+    color_nodes = {tuple(positions[i]):color_nodes[i] for i in range(N)}
     
 
     X = positions
@@ -355,7 +355,7 @@ def visualize_UDG(positions,
     if type(color_nodes)==int:
         color_nodes2 = VERTEX_COLOR_LOOKUP[color_nodes]
     
-    elif type(color_nodes)==type('string'):
+    elif type(color_nodes)==str:
         color_nodes2 = color_nodes
     elif len(color_nodes)>=len(G.nodes):
         color_nodes2 = []
