@@ -39,7 +39,7 @@ def show_register(
     
     
     if what_to_draw=="bond":
-        ax, G = visualize_UDG(positions = positions[is_filled,:],
+        ax, _ = visualize_UDG(positions = positions[is_filled,:],
                           radii = blockade_radius/2,
                           label_nodes=show_atom_index)
     elif what_to_draw=="circle":
@@ -344,7 +344,7 @@ def visualize_UDG(positions,
     edgesize = 4*scaling    * scale
     
     
-    # Define vertex colors from a pallite
+    # Define vertex colors from a palette
     VERTEX_COLOR_LOOKUP = {0:'#333333',2:"#FF505D",3:"#6437FF",1:"#C2477F"}
     
     # Define edge styles from a pallite
@@ -352,7 +352,7 @@ def visualize_UDG(positions,
     EDGE_COLOR_LOOKUP = {0:'#333333',1:'grey',2:'#E6E6E6',-1:'white'}
     
     # Clean the node color list
-    if type(color_nodes)==type(1):
+    if type(color_nodes)==int:
         color_nodes2 = VERTEX_COLOR_LOOKUP[color_nodes]
     
     elif type(color_nodes)==type('string'):
