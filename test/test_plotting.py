@@ -44,5 +44,5 @@ class PlotModule(unittest.TestCase):
         # NOTE: You CANNOT store the date as any format with slashes, this gets misinterpreted as a filepath!
         date_and_time = now.strftime("%m-%d-%Y %H:%M:%S")
         cwd = os.path.dirname(os.path.abspath(__file__))
-        filename = os.path.join(cwd,"aux_files",f"${date_and_time}-plot-avg-density-test.png")
+        filename = os.path.join(cwd,"aux_files",f"{date_and_time}-plot-avg-density-test.png")
         fig.savefig( filename, format="png")
