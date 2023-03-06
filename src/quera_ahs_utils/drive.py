@@ -234,10 +234,10 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
 
     Args:
         time_series (TimeSeries): The time series to slice
-        first (float): the lower bound of the slicing region
-        last (float): upper bound of the slicing region
-        piecewise_constant (bool, optional): flag to use piecewise linear interpolation to get 
-            end points, otherwise use piecewise linear interpolation. Defaults to False.
+        first (float): Lower bound of the slicing region
+        last (float): Upper bound of the slicing region
+        piecewise_constant (bool, optional): Flag to use piecewise constant interpolation to get 
+            end points of slice, otherwise use piecewise linear interpolation. Defaults to False.
     """
     times = np.array(time_series.times())    
     values = np.array(time_series.values())
