@@ -232,12 +232,15 @@ def concatenate_shift_list(shift_list: List[ShiftingField]) -> ShiftingField:
 def slice_time_series(time_series: TimeSeries, first: float, last: float, piecewise_constant=False):
     """Obtain a sub-section of a TimeSeries between times `first` and `last`
 
-    Args:
-        time_series (TimeSeries): The time series to slice
-        first (float): Lower bound of the slicing region
-        last (float): Upper bound of the slicing region
-        piecewise_constant (bool, optional): Flag to use piecewise constant interpolation to get 
-            end points of slice, otherwise use piecewise linear interpolation. Defaults to False.
+        Args:
+            time_series (TimeSeries): The time series to slice
+            first (float): Lower bound of the slicing region
+            last (float): Upper bound of the slicing region
+            piecewise_constant (bool, optional): Flag to use piecewise constant interpolation to get 
+                end points of slice, otherwise use piecewise linear interpolation. Defaults to False.
+                
+        Returns:
+            TimeSeries: The resulting time series after slicing. 
     """
     times = np.array(time_series.times())    
     values = np.array(time_series.values())
@@ -268,13 +271,33 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
     
     return new_time_series
 
-def slice_drive(drive: DrivingField, first: float, last: float):
+def slice_drive(drive: DrivingField, first: float, last: float) -> DrivingField:
+    """Obtain a sub-section of a driving field between times `first` and `last`
+
+        Args:
+            drive (DrivingField): The driving field object to be sliced. 
+            first (float): Lower bound of the slice. 
+            last (float): Upper bound of the slice.
+
+        Returns:
+            DrivingField: The resulting driving field after slicing
+    """
     return DrivingField(
         amplitude=slice_time_series(drive.amplitude.time_series, first, last),
         detuning=slice_time_series(drive.detuning.time_series, first, last),
         phase=slice_time_series(drive.phase.time_series, first, last, piecewise_constant=True)
     )
     
-def slice_shift(shift: ShiftingField, first: float, last: float):
+def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingField:
+    """Obtain a sub-section of shifting field begin times `first` and `last`
+
+    Args:
+        shift (ShiftingField): The shifting field object to be sliced
+        first (float): Lower bound of the slice. 
+        last (float): Upper bound of the slice. 
+
+    Returns:
+        ShiftingField: The resulting shifting field after slicing. 
+    """
     new_time_series = slice_time_series(shift.magnitude.time_series, first, last)
     return ShiftingField(Field(new_time_series, shift.magnitude.pattern))
