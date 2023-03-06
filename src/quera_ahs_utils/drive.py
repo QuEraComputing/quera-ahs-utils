@@ -1,3 +1,4 @@
+import decimal
 import numpy as np
 
 from braket.timings.time_series import TimeSeries
@@ -19,10 +20,14 @@ __all__ = [
     "get_shift",
     "constant_time_series",
     "concatenate_time_series",
+    "slice_time_series",
     "concatenate_drives",
+    "slice_drives",
     "concatenate_shifts",
+    "slice_shifts",
     "concatenate_drive_list",
-    "concatenate_shift_list"
+    "concatenate_shift_list",
+    
 ]
 
 
@@ -223,3 +228,76 @@ def concatenate_shift_list(shift_list: List[ShiftingField]) -> ShiftingField:
         shift = concatenate_shifts(shift, sf)
     return shift
 
+
+def slice_time_series(time_series: TimeSeries, first: float, last: float, piecewise_constant=False):
+    """Obtain a sub-section of a TimeSeries between times `first` and `last`
+
+        Args:
+            time_series (TimeSeries): The time series to slice
+            first (float): Lower bound of the slicing region
+            last (float): Upper bound of the slicing region
+            piecewise_constant (bool, optional): Flag to use piecewise constant interpolation to get 
+                end points of slice, otherwise use piecewise linear interpolation. Defaults to False.
+                
+        Returns:
+            TimeSeries: The resulting time series after slicing. 
+    """
+    times = np.array(time_series.times())    
+    values = np.array(time_series.values())
+    
+    assert first < last
+    assert first >= 0
+    assert last <= times[-1]
+    
+    first_index = np.searchsorted(times,first)
+    last_index = np.searchsorted(times,last)
+    
+    if piecewise_constant:
+        first_value = values[first_index]
+        last_value = values[last_index]
+    else:
+        first_value,last_value = np.interp([first,last],times,values)
+
+    new_time_series = TimeSeries()
+    
+    new_time_series.put(0.0,first_value)
+    
+    inter_times = times[first_index:last_index]
+    inter_values = values[first_index:last_index]
+    for time,value in zip(inter_times,inter_values):
+        new_time_series.put(time-first,value)
+        
+    new_time_series.put((last-first),last_value)
+    
+    return new_time_series
+
+def slice_drive(drive: DrivingField, first: float, last: float) -> DrivingField:
+    """Obtain a sub-section of a driving field between times `first` and `last`
+
+        Args:
+            drive (DrivingField): The driving field object to be sliced. 
+            first (float): Lower bound of the slice. 
+            last (float): Upper bound of the slice.
+
+        Returns:
+            DrivingField: The resulting driving field after slicing
+    """
+    return DrivingField(
+        amplitude=slice_time_series(drive.amplitude.time_series, first, last),
+        detuning=slice_time_series(drive.detuning.time_series, first, last),
+        phase=slice_time_series(drive.phase.time_series, first, last, piecewise_constant=True)
+    )
+    
+def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingField:
+    """Obtain a sub-section of shifting field begin times `first` and `last`
+
+    Args:
+        shift (ShiftingField): The shifting field object to be sliced
+        first (float): Lower bound of the slice. 
+        last (float): Upper bound of the slice. 
+
+    Returns:
+        ShiftingField: The resulting shifting field after slicing. 
+    """
+    new_time_series = slice_time_series(shift.magnitude.time_series, first, last)
+    return ShiftingField(Field(new_time_series, shift.magnitude.pattern))

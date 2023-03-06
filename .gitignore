@@ -132,3 +132,4 @@ dmypy.json
 .pyre/
 
 old_code/
+*-plot-avg-density-test.png
