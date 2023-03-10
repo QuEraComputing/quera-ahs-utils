@@ -332,8 +332,11 @@ def get_time_series_value(time_series: TimeSeries, time: float, piecewise_consta
     """
     times = time_series.times()
     values = time_series.values()
-    
+
     if piecewise_constant:
+        index = max(0, min(len(times) - 1, np.searchsorted(times, time, side="right") - 1))
+        return values[index]
+    else:
         return np.interp(
             time,
             times,
@@ -341,9 +344,7 @@ def get_time_series_value(time_series: TimeSeries, time: float, piecewise_consta
             left=values[0],
             right=values[-1]
         )
-    else:
-        index = min(len(values) - 1, np.searchsorted(times, time))
-        return values[index]
+
 
 
 @dataclass
