@@ -142,6 +142,57 @@ def get_shift(times: List[float], values: List[float], pattern: List[float]) -> 
     return shift
 
 
+def get_time_series_value(time_series: TimeSeries, time: float, piecewise_constant: bool = False) -> float:
+    """obtain value of a time series at a specific time
+
+    Args:
+        time_series (TimeSeries): The `TimeSeries` object to sample from.
+        time (float): The time point to sample `times_series` at. 
+        piecewise_constant (bool, optional): Interpolate `time_series` assuming piecewise constant, 
+            otherwise use piecewise linear. Defaults to False.
+
+    Returns:
+        float: the resulting sampled point. 
+    """
+    times = time_series.times()
+    values = time_series.values()
+
+    if piecewise_constant:
+        index = max(0, min(len(times) - 1, np.searchsorted(times, time, side="right") - 1))
+        return values[index]
+    else:
+        return np.interp(
+            time,
+            times,
+            values,
+            left=values[0],
+            right=values[-1]
+        )
+
+@dataclass
+class DrivingFieldValue:
+    amplitude: Number
+    detuning: Number
+    phase: Number
+
+def get_driving_field_values(driving_field: DrivingField, time: float) -> DrivingFieldValue:
+    """Sample the driving feild values at a specific time point.
+
+    Args:
+        driving_field (DrivingField): the `DrivingField` object to sample from
+        time (float): time to sample `driving_field` at. 
+
+    Returns:
+        DrivingFieldValue: An object that contains the values for the different driving fields
+    """
+    
+    return DrivingFieldValue(
+        amplitude = get_time_series_value(driving_field.amplitude, time),
+        detuning = get_time_series_value(driving_field.detuning, time),
+        phase = get_time_series_value(driving_field.phase, time, piecewise_constant=True),
+    )
+
+
 def constant_time_series(other_time_series: TimeSeries, constant: float=0.0) -> TimeSeries:
     """Obtain a constant time series with the same time points as the given time series
 
@@ -266,12 +317,9 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
     
     first_index = np.searchsorted(times,first)
     last_index = np.searchsorted(times,last)
-    
-    if piecewise_constant:
-        first_value = values[first_index]
-        last_value = values[last_index]
-    else:
-        first_value,last_value = np.interp([first,last],times,values)
+
+    first_value = get_time_series_value(time_series, first, piecewise_constant=piecewise_constant)
+    last_value  = get_time_series_value(time_series, last, piecewise_constant=piecewise_constant)
 
     new_time_series = TimeSeries()
     
@@ -317,59 +365,6 @@ def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingFiel
     new_time_series = slice_time_series(shift.magnitude.time_series, first, last)
     return ShiftingField(Field(new_time_series, shift.magnitude.pattern))
 
-
-def get_time_series_value(time_series: TimeSeries, time: float, piecewise_constant: bool = False) -> float:
-    """obtain value of a time series at a specific time
-
-    Args:
-        time_series (TimeSeries): The `TimeSeries` object to sample from.
-        time (float): The time point to sample `times_series` at. 
-        piecewise_constant (bool, optional): Interpolate `time_series` assuming piecewise constant, 
-            otherwise use piecewise linear. Defaults to False.
-
-    Returns:
-        float: the resulting sampled point. 
-    """
-    times = time_series.times()
-    values = time_series.values()
-
-    if piecewise_constant:
-        index = max(0, min(len(times) - 1, np.searchsorted(times, time, side="right") - 1))
-        return values[index]
-    else:
-        return np.interp(
-            time,
-            times,
-            values,
-            left=values[0],
-            right=values[-1]
-        )
-
-
-
-@dataclass
-class DrivingFieldValue:
-    amplitude: Number
-    detuning: Number
-    phase: Number
-
-
-def get_driving_field_values(driving_field: DrivingField, time: float) -> DrivingFieldValue:
-    """Sample the driving feild values at a specific time point.
-
-    Args:
-        driving_field (DrivingField): the `DrivingField` object to sample from
-        time (float): time to sample `driving_field` at. 
-
-    Returns:
-        DrivingFieldValue: An object that contains the values for the different driving fields
-    """
-    
-    return DrivingFieldValue(
-        amplitude = get_time_series_value(driving_field.amplitude, time),
-        detuning = get_time_series_value(driving_field.detuning, time),
-        phase = get_time_series_value(driving_field.phase, time, piecewise_constant=True),
-    )
 
 def adiabatic_drive(
         t_ramp_up: float,
