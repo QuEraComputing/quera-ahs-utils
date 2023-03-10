@@ -6,12 +6,11 @@ from braket.ahs.driving_field import DrivingField
 from braket.ahs.shifting_field import ShiftingField
 from braket.ahs.field import Field
 from braket.ahs.pattern import Pattern
-from collections import Counter
 
-from typing import Dict, List, Tuple
-from braket.tasks.analog_hamiltonian_simulation_quantum_task_result \
-    import AnalogHamiltonianSimulationQuantumTaskResult
-from braket.ahs.atom_arrangement import AtomArrangement
+from numbers import Number
+from dataclasses import dataclass
+from typing import List, Tuple, Union
+
 
 
 __all__ = [
@@ -30,6 +29,22 @@ __all__ = [
     
 ]
 
+def time_series(times: List[float], values: List[float]) -> TimeSeries:
+    """create `TimeSeries` object from a list of times and values. 
+
+    Args:
+        times (List[float]): :ist of times for TimeSeries
+        values (List[float]): List of values for TimeSeries
+
+    Returns:
+        TimeSeries: The `TimeSeries` generated from the given times and values. 
+    """
+    assert len(times) == len(values)
+    
+    time_series = TimeSeries()
+    for time,value in zip(times,values):
+        time_series.put(time,value)
+    return time_series
 
 def rabi_pulse(
     rabi_pulse_area: float, 
@@ -301,3 +316,88 @@ def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingFiel
     """
     new_time_series = slice_time_series(shift.magnitude.time_series, first, last)
     return ShiftingField(Field(new_time_series, shift.magnitude.pattern))
+
+
+def get_time_series_value(time_series: TimeSeries, time: float, piecewise_constant: bool = False) -> float:
+    """obtain value of a time series at a specific time
+
+    Args:
+        time_series (TimeSeries): The `TimeSeries` object to sample from.
+        time (float): The time point to sample `times_series` at. 
+        piecewise_constant (bool, optional): Interpolate `time_series` assuming piecewise constant, 
+            otherwise use piecewise linear. Defaults to False.
+
+    Returns:
+        float: the resulting sampled point. 
+    """
+    times = time_series.times()
+    values = time_series.values()
+    
+    if piecewise_constant:
+        return np.interp(
+            time,
+            times,
+            values,
+            left=values[0],
+            right=values[-1]
+        )
+    else:
+        index = min(len(values) - 1, np.searchsorted(times, time))
+        return values[index]
+
+
+@dataclass
+class DrivingFieldValue:
+    amplitude: Number
+    detuning: Number
+    phase: Number
+
+
+def get_driving_field_values(driving_field: DrivingField, time: float) -> DrivingFieldValue:
+    """Sample the driving feild values at a specific time point.
+
+    Args:
+        driving_field (DrivingField): the `DrivingField` object to sample from
+        time (float): time to sample `driving_field` at. 
+
+    Returns:
+        DrivingFieldValue: An object that contains the values for the different driving fields
+    """
+    
+    return DrivingFieldValue(
+        amplitude = get_time_series_value(driving_field.amplitude, time),
+        detuning = get_time_series_value(driving_field.detuning, time),
+        phase = get_time_series_value(driving_field.phase, time, piecewise_constant=True),
+    )
+
+def adiabatic_drive(
+        t_ramp_up: float,
+        t_ramp_down: float,
+        t_sweep: float,
+        Omega_max: float,
+        Delta_start: float,
+        Delta_end: float
+    ) -> DrivingField:
+    """Create a basic adiabatic pulse. 
+
+    Args:
+        t_ramp_up (float): Time to ramp up rabi drive
+        t_ramp_down (float): Time to ramp down rabi drive
+        t_sweep (float): Time used to sweep detuning
+        Omega_max (float): Maximum value of the rabi drive to use during detuning sweep
+        Delta_start (float): Start value for detuning
+        Delta_end (float): End value for detuning
+
+    Returns:
+        DrivingField: The `DrivingField` object with the resulting adiabatic drive. 
+    """
+    
+    times = [0, t_ramp_up, t_ramp_up + t_sweep, t_ramp_up + t_sweep + t_ramp_down]
+    detunings = [Delta_start,Delta_start,Delta_end,Delta_end]
+    amplitudes = [0, Omega_max, Omega_max, 0]
+    
+    return DrivingField(
+        amplitude=time_series(times,amplitudes),
+        detunings=time_series(times,detunings),
+        phase=time_series([0,times[-1]],[0, 0])
+    )
