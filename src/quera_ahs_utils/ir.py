@@ -119,7 +119,7 @@ def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) 
         x,y = site.coordinate
         site_type = site.site_type
         fill = 1 if site_type == SiteType.FILLED else 0
-        sites.append([x,y])
+        sites.append([float(x),float(y)])
         filling.append(fill)
 
 
