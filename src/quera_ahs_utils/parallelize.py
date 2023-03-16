@@ -38,10 +38,14 @@ def generate_parallel_register(
     Returns:
         _type_: _description_
     """
-    x_min = min(*[site.coordinate[0] for site in register])
-    x_max = max(*[site.coordinate[0] for site in register])
-    y_min = min(*[site.coordinate[1] for site in register])
-    y_max = max(*[site.coordinate[1] for site in register])
+    if len(register) > 1:
+        x_min = min(*[site.coordinate[0] for site in register])
+        x_max = max(*[site.coordinate[0] for site in register])
+        y_min = min(*[site.coordinate[1] for site in register])
+        y_max = max(*[site.coordinate[1] for site in register])
+    else:
+        x_min = x_max = 0
+        y_min = y_max = 0
 
     single_problem_width = x_max - x_min
     single_problem_height = y_max - y_min
@@ -50,28 +54,33 @@ def generate_parallel_register(
     field_of_view_width = qpu.properties.paradigm.lattice.area.width
     field_of_view_height = qpu.properties.paradigm.lattice.area.height
     n_site_max = qpu.properties.paradigm.lattice.geometry.numberSitesMax
-
     # setting up a grid of problems filling the total area
-    n_width = int(float(field_of_view_width)   // (single_problem_width  + interproblem_distance))
-    n_height = int(float(field_of_view_height) // (single_problem_height + interproblem_distance))
-
+    rescaled_width = float(field_of_view_width) / (single_problem_width  + interproblem_distance)
+    rescaled_height = float(field_of_view_height) / (single_problem_height + interproblem_distance)
+    
+    n_width = int(np.floor(np.around(rescaled_width,13))) + 1
+    n_height = int(np.floor(np.around(rescaled_height,13))) + 1
+    
     batch_mapping = dict()
     parallel_register = AtomArrangement()
 
     atom_number = 0 #counting number of atoms added
 
     for ix in range(n_width):
-        x_shift = ix * (single_problem_width   + interproblem_distance)
+        x_shift = ix * (single_problem_width + interproblem_distance)
 
         for iy in range(n_height):    
-            y_shift = iy * (single_problem_height  + interproblem_distance)
+            y_shift = iy * (single_problem_height + interproblem_distance)
 
             # reached the maximum number of batches possible given n_site_max
             if atom_number + len(register) > n_site_max: break 
 
             atoms = []
             for site in register:
-                new_coordinate = (x_shift + site.coordinate[0], y_shift + site.coordinate[1])
+                new_coordinate = (
+                    x_shift + site.coordinate[0], 
+                    y_shift + site.coordinate[1]
+                )
                 parallel_register.add(new_coordinate,site.site_type)
 
                 atoms.append(atom_number)
