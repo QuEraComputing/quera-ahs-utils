@@ -54,26 +54,29 @@ def generate_parallel_register(
     field_of_view_width = qpu.properties.paradigm.lattice.area.width
     field_of_view_height = qpu.properties.paradigm.lattice.area.height
     n_site_max = qpu.properties.paradigm.lattice.geometry.numberSitesMax
-    # setting up a grid of problems filling the total area
-    rescaled_width = float(field_of_view_width) / (single_problem_width  + interproblem_distance)
-    rescaled_height = float(field_of_view_height) / (single_problem_height + interproblem_distance)
-    
-    n_width = int(np.floor(np.around(rescaled_width,13))) + 1
-    n_height = int(np.floor(np.around(rescaled_height,13))) + 1
     
     batch_mapping = dict()
     parallel_register = AtomArrangement()
 
     atom_number = 0 #counting number of atoms added
-
-    for ix in range(n_width):
+    
+    ix = 0
+    while True:
         x_shift = ix * (single_problem_width + interproblem_distance)
-
-        for iy in range(n_height):    
+        # reached the maximum number of batches possible given n_site_max
+        if atom_number + len(register) > n_site_max: break
+        # reached the maximum number of batches possible along x-direction
+        if x_shift + single_problem_width > field_of_view_width: break 
+        
+        iy = 0
+        while True:
             y_shift = iy * (single_problem_height + interproblem_distance)
-
             # reached the maximum number of batches possible given n_site_max
             if atom_number + len(register) > n_site_max: break 
+            # reached the maximum number of batches possible along y-direction
+            if y_shift + single_problem_height > field_of_view_height: 
+                ix += 1
+                break
 
             atoms = []
             for site in register:
@@ -86,8 +89,9 @@ def generate_parallel_register(
                 atoms.append(atom_number)
 
                 atom_number += 1
-
+            
             batch_mapping[(ix,iy)] = atoms
+            iy += 1        
 
     return parallel_register,batch_mapping
 
