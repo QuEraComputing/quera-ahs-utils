@@ -394,6 +394,6 @@ def adiabatic_drive(
     
     return DrivingField(
         amplitude=time_series(times,amplitudes),
-        detunings=time_series(times,detunings),
+        detuning=time_series(times,detunings),
         phase=time_series([0,times[-1]],[0, 0])
     )
