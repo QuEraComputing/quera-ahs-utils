@@ -127,12 +127,24 @@ def get_field(field: braket_ir.PhysicalField):
     
     return times, values, field.pattern
     
+def get_local_detuning(shifting):
+    local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
+    
+    if lattice_site_coefficients == 'uniform': 
+        raise ValueError("local detuning must a list of detuning values, not 'uniform'")
+    
+    return {
+                "lattice_site_coefficients": [float(coeff) for coeff in lattice_site_coefficients], 
+                "times": local_times, 
+                "values": local_values
+            }
+    
 def get_detuning(driving, shifting = None):
 
     global_times, global_values, global_pattern = get_field(driving.detuning)
 
     if global_pattern != 'uniform': 
-        raise ValueError("global detuning must have uniform pattern")
+        raise ValueError("Detuning must have uniform pattern")
     
     if shifting is None:
         return {"global": {
@@ -141,27 +153,18 @@ def get_detuning(driving, shifting = None):
                     }
                 }
     else:
-        local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
-        
-        if lattice_site_coefficients == 'uniform': 
-            raise ValueError("local detuning must a list of detuning values, not 'uniform'")
-        
         return {"global": {
                     "times": global_times, 
                     "values": global_values
                     },
-                "local": {
-                    "lattice_site_coefficients": [float(coeff) for coeff in lattice_site_coefficients], 
-                    "times": local_times, 
-                    "values": local_values
-                    }
+                "local": get_local_detuning(shifting)
                 }
         
 def get_rabi(driving):
     global_times, global_values, global_pattern = get_field(driving.amplitude)
 
     if global_pattern != 'uniform': 
-        raise ValueError("global detuning must have uniform pattern")
+        raise ValueError("Amplitude must have uniform pattern")
 
     return {"global": {"times": global_times, "values": global_values}}
 
@@ -169,7 +172,7 @@ def get_phase(driving):
     global_times, global_values, global_pattern = get_field(driving.phase)
 
     if global_pattern != 'uniform': 
-        raise ValueError("global detuning must have uniform pattern")
+        raise ValueError("Phase must have uniform pattern")
 
     return {"global": {"times": global_times, "values": global_values}}
 
