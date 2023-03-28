@@ -1,11 +1,16 @@
 from braket.ahs.atom_arrangement import SiteType
+import braket.ahs.pattern
 from braket.timings.time_series import TimeSeries
 from braket.ahs.driving_field import DrivingField
+from braket.ahs.shifting_field import ShiftingField
+from braket.ahs.pattern import Pattern
+from braket.ahs.field import Field
+import braket.ir.ahs as braket_ir
 
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement
 
-from typing import NoReturn,Tuple
+from typing import NoReturn,Tuple, Optional
 
 # import simplejson as json
 from braket.ir.ahs import Program
@@ -49,6 +54,55 @@ def from_json_file(json_filename:str) -> dict:
     return js
 
 
+def get_register(lattice):
+    register = AtomArrangement()
+    for coord,filling in zip(lattice["sites"],lattice["filling"]):
+        site_type = SiteType.FILLED if filling==1 else SiteType.VACANT
+        register.add(coord, site_type)
+    
+    return register
+
+def get_hamiltonian(effective_hamiltonian):
+    rydberg = effective_hamiltonian["rydberg"]
+
+    js_amplitude = rydberg["rabi_frequency_amplitude"]["global"]
+    js_phase = rydberg["rabi_frequency_phase"]["global"]
+    js_detuning = rydberg["detuning"]["global"]
+    js_local_detuning = rydberg["detuning"].get("local", None)
+
+    amplitude = TimeSeries()
+    detuning = TimeSeries()  
+    phase = TimeSeries()
+    
+    for t,amplitude_value in zip(js_amplitude["times"],js_amplitude["values"]):
+        amplitude.put(t, amplitude_value)
+
+    for t,detuning_value in zip(js_detuning["times"],js_detuning["values"]):
+        detuning.put(t, detuning_value)
+
+    for t,phase_value in zip(js_phase["times"],js_phase["values"]):
+        phase.put(t, phase_value) 
+
+    hamiltonian = DrivingField(
+        amplitude=amplitude, 
+        detuning=detuning, 
+        phase=phase
+    )
+
+    if js_local_detuning != None:
+        local_detuning = TimeSeries()
+        for t,detuning_value in zip(js_local_detuning["times"],js_local_detuning["values"]):
+            local_detuning.put(t, detuning_value) 
+
+        hamiltonian = hamiltonian + ShiftingField(
+            Field(
+                    local_detuning, 
+                    Pattern(js_local_detuning["lattice_site_coefficients"])
+                )
+            )
+        
+    return hamiltonian
+
 def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
     """Convert a QuEra compatible program to a braket AHS program. 
 
@@ -61,47 +115,95 @@ def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
             the number of shots as the first element and the ahs program 
             as the second argument. 
     """
-    register = AtomArrangement()
 
-    nshots = js["nshots"]
-
-    lattice = js["lattice"]
-    for coord,filling in zip(lattice["sites"],lattice["filling"]):
-        site_type = SiteType.FILLED if filling==1 else SiteType.VACANT
-        register.add(coord,site_type)
-
-    rydberg = js["effective_hamiltonian"]["rydberg"]
-
-
-    js_amplitude = rydberg["rabi_frequency_amplitude"]["global"]
-    js_phase = rydberg["rabi_frequency_phase"]["global"]
-    js_detuning = rydberg["detuning"]["global"]
-
-    amplitude = TimeSeries()
-    detuning = TimeSeries()  
-    phase = TimeSeries()    
-
-    for t,amplitude_value in zip(js_amplitude["times"],js_amplitude["values"]):
-        amplitude.put(t, amplitude_value)
-
-    for t,detuning_value in zip(js_detuning["times"],js_detuning["values"]):
-        detuning.put(t, detuning_value)
-
-    for t,phase_value in zip(js_phase["times"],js_phase["values"]):
-        phase.put(t, phase_value) 
-
-
-    drive = DrivingField(
-        amplitude=amplitude, 
-        detuning=detuning, 
-        phase=phase
-    )
-        
-    return nshots,AnalogHamiltonianSimulation(
-            register=register, 
-            hamiltonian=drive
+    return js["nshots"],AnalogHamiltonianSimulation(
+            register=get_register(js["lattice"]), 
+            hamiltonian=get_hamiltonian(js["effective_hamiltonian"])
         )
 
+
+def get_field(field: braket_ir.PhysicalField):
+    times = list(np.array(field.time_series.times,dtype=np.float64))
+    values = list(np.array(field.time_series.values,dtype=np.float64))
+    
+    return times, values, field.pattern
+    
+def get_detuning(driving, shifting = None):
+
+    global_times, global_values, global_pattern = get_field(driving.detuning)
+
+    if global_pattern != 'uniform': 
+        raise ValueError("global detuning must have uniform pattern")
+    
+    local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
+
+    if lattice_site_coefficients == 'uniform': 
+        raise ValueError("local detuning must a list of detuning values, not 'uniform'")
+
+    if shifting is None:
+        return {"global": {
+                    "times": global_times, 
+                    "values": global_values
+                    }
+                }
+    else:
+        return {"global": {
+                    "times": global_times, 
+                    "values": global_values
+                    },
+                "local": {
+                    "lattice_site_coefficients": [float(coeff) for coeff in lattice_site_coefficients], 
+                    "times": local_times, 
+                    "values": local_values
+                    }
+                }
+        
+def get_rabi(driving):
+    global_times, global_values, global_pattern = get_field(driving.amplitude)
+
+    if global_pattern != 'uniform': 
+        raise ValueError("global detuning must have uniform pattern")
+
+    return {"global": {"times": global_times, "values": global_values}}
+
+def get_phase(driving):
+    global_times, global_values, global_pattern = get_field(driving.phase)
+
+    if global_pattern != 'uniform': 
+        raise ValueError("global detuning must have uniform pattern")
+
+    return {"global": {"times": global_times, "values": global_values}}
+
+def get_rydberg(driving, shifting = None):
+    return {
+        "rabi_frequency_amplitude": get_rabi(driving),
+        "rabi_frequency_phase": get_phase(driving),
+        "detuning": get_detuning(driving, shifting)
+    }
+
+def get_effective_hamiltonian(hamiltonian_ir):
+    
+    driving_fields = hamiltonian_ir.drivingFields
+    shifting_fields = hamiltonian_ir.shiftingFields
+    
+    if len(driving_fields) > 1: raise ValueError("QuEra IR only supports one set of driving fields")
+    if len(shifting_fields) > 1:  raise ValueError("QuEra IR only supports one set of shifting fields")
+    
+    if len(shifting_fields) == 0:
+        return {
+            "rydberg": get_rydberg(driving_fields[0])
+        }
+    else:
+        return {
+            "rydberg": get_rydberg(driving_fields[0], shifting_fields[0])
+        }       
+
+def get_lattice(setup):
+    sites = []
+    for (x,y) in setup.ahs_register.sites:
+        sites.append([float(x),float(y)])
+        
+    return {"sites":sites, "filling": setup.ahs_register.filling}
 
 def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) -> dict:
     """Translates Braket AHS IR program to Quera-compatible JSON.
@@ -113,40 +215,11 @@ def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) 
     Returns:
         dict: Serialized QuEra-compatible dict representation of program
     """
-    sites = []
-    filling = []
-    for site in ahs.register:
-        x,y = site.coordinate
-        site_type = site.site_type
-        fill = 1 if site_type == SiteType.FILLED else 0
-        sites.append([float(x),float(y)])
-        filling.append(fill)
 
-
-    rabi_times = list(np.array(ahs.hamiltonian.amplitude.time_series.times(),dtype=np.float64))
-    rabi_values = list(np.array(ahs.hamiltonian.amplitude.time_series.values(),dtype=np.float64))
-
-    phase_times = list(np.array(ahs.hamiltonian.phase.time_series.times(),dtype=np.float64))
-    phase_values = list(np.array(ahs.hamiltonian.phase.time_series.values(),dtype=np.float64))
-
-    detuning_times = list(np.array(ahs.hamiltonian.detuning.time_series.times(),dtype=np.float64))
-    detuning_values = list(np.array(ahs.hamiltonian.detuning.time_series.values(),dtype=np.float64))
-    
-
+    ahs_ir = ahs.to_ir()
     # QuEra IR Program
-    translated_quera_program = dict()
-    translated_quera_program["nshots"] = shots
-    translated_quera_program["lattice"] = {"sites":sites,"filling":filling}
-    translated_quera_program["effective_hamiltonian"] = {
-        "rydberg": {
-            "rabi_frequency_amplitude": {"global": {"times": rabi_times, "values": rabi_values}},
-            "rabi_frequency_phase": {"global": {"times": phase_times, "values":phase_values}},
-            "detuning": {
-                "global": {"times": detuning_times, "values": detuning_values},
-            },
-        }
+    return {
+        "nshots": shots,
+        "lattice": get_lattice(ahs_ir.setup),
+        "effective_hamiltonian" : get_effective_hamiltonian(ahs_ir.hamiltonian)
     }
-    
-
-
-    return translated_quera_program
