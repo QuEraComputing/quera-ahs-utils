@@ -134,11 +134,6 @@ def get_detuning(driving, shifting = None):
     if global_pattern != 'uniform': 
         raise ValueError("global detuning must have uniform pattern")
     
-    local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
-
-    if lattice_site_coefficients == 'uniform': 
-        raise ValueError("local detuning must a list of detuning values, not 'uniform'")
-
     if shifting is None:
         return {"global": {
                     "times": global_times, 
@@ -146,6 +141,11 @@ def get_detuning(driving, shifting = None):
                     }
                 }
     else:
+        local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
+        
+        if lattice_site_coefficients == 'uniform': 
+            raise ValueError("local detuning must a list of detuning values, not 'uniform'")
+        
         return {"global": {
                     "times": global_times, 
                     "values": global_values
@@ -185,7 +185,7 @@ def get_effective_hamiltonian(hamiltonian_ir):
     driving_fields = hamiltonian_ir.drivingFields
     shifting_fields = hamiltonian_ir.shiftingFields
     
-    if len(driving_fields) > 1: raise ValueError("QuEra IR only supports one set of driving fields")
+    if len(driving_fields) != 1: raise ValueError("QuEra IR only supports exactly one set of driving fields")
     if len(shifting_fields) > 1:  raise ValueError("QuEra IR only supports one set of shifting fields")
     
     if len(shifting_fields) == 0:
