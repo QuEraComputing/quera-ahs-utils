@@ -1,5 +1,4 @@
 from braket.ahs.atom_arrangement import SiteType
-import braket.ahs.pattern
 from braket.timings.time_series import TimeSeries
 from braket.ahs.driving_field import DrivingField
 from braket.ahs.shifting_field import ShiftingField
