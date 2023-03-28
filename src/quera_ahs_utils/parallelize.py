@@ -1,11 +1,14 @@
 
 from itertools import product
 import numpy as np
-from typing import Tuple,Union,NoReturn,Optional
+from typing import Tuple,Union, NoReturn, Optional
 from decimal import Decimal
 
 from braket.aws import AwsDevice
-from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation,DrivingField
+from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
+from braket.ahs.driving_field import DrivingField
+from braket.ahs.shifting_field import ShiftingField
+from braket.ahs.hamiltonian import Hamiltonian
 from braket.ahs.field import Field
 from braket.task_result import AnalogHamiltonianSimulationTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
@@ -91,7 +94,7 @@ def generate_parallel_register(
                 atom_number += 1
             
             batch_mapping[(ix,iy)] = atoms
-            iy += 1        
+            iy += 1
 
     return parallel_register,batch_mapping
 
@@ -112,30 +115,48 @@ def parallelize_field(
     Returns:
         Field: the new field that works for the parallel program. 
     """
-    if field.pattern == None:
+    if field.pattern == None or field.pattern == "uniform":
         return field
     else:
-        raise NotImplementedError("Non-uniform pattern note supported in parallelization")
+        natoms = sum([len(atom_list) for atom_list in batch_mapping.values()])
 
+        new_pattern_series = np.zeros(natoms)
+        for atom_list in batch_mapping.values():
+            new_pattern_series[atom_list] = field.pattern.series
+        
+        return Field(field.time_series, Pattern(list(new_pattern_series)))
+        
 
 def parallelize_hamiltonian(
-    driving_field: DrivingField,
+    hamiltonian: Hamiltonian,
     batch_mapping:dict
 ) -> DrivingField:
     """Generate the parallel driving fields from a batch_mapping. 
 
     Args:
-        driving_field (DrivingField): The fields to parallelize
+        hamiltonian (Hamiltonian): The fields to parallelize
         batch_mapping (dict): the mapping that generates the parallelization
 
     Returns:
-        DrivingField: the parallelized driving field. 
+        Hamiltonian: the parallelized driving field. 
     """
-    return DrivingField(
-        amplitude=parallelize_field(driving_field.amplitude,batch_mapping),
-        phase=parallelize_field(driving_field.phase,batch_mapping),
-        detuning=parallelize_field(driving_field.detuning,batch_mapping)
-        )
+    if isinstance(hamiltonian, DrivingField):
+        return DrivingField(
+                amplitude=parallelize_field(hamiltonian.amplitude, batch_mapping),
+                phase=parallelize_field(hamiltonian.phase, batch_mapping),
+                detuning=parallelize_field(hamiltonian.detuning, batch_mapping)
+            )
+    elif isinstance(hamiltonian, ShiftingField):
+        return ShiftingField(parallelize_field(hamiltonian.magnitude))
+    elif isinstance(hamiltonian, Hamiltonian):
+        return Hamiltonian(
+                map(
+                        lambda h: parallelize_hamiltonian(h, batch_mapping), 
+                        hamiltonian.terms
+                    )
+                )
+    else:
+        raise ValueError("expecting Hamiltonian or subtype of Hamiltonian")
 
 
 def parallelize_ahs(
