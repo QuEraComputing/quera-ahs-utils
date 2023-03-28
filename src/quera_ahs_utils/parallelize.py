@@ -1,4 +1,5 @@
 
+import dataclasses
 from itertools import product
 import numpy as np
 from typing import Tuple,Union, NoReturn, Optional
@@ -109,9 +110,6 @@ def parallelize_field(
         field (Field): the field to parallelize
         batch_mapping (dict): the mapping that describes the parallelization
 
-    Raises:
-        NotImplementedError: currently not supporting local detuning. 
-
     Returns:
         Field: the new field that works for the parallel program. 
     """
@@ -120,11 +118,11 @@ def parallelize_field(
     else:
         natoms = sum([len(atom_list) for atom_list in batch_mapping.values()])
 
-        new_pattern_series = np.zeros(natoms)
-        for atom_list in batch_mapping.values():
-            new_pattern_series[atom_list] = field.pattern.series
+        parallel_pattern_series = np.empty(natoms, dtype=object)
+        for atom_subset in batch_mapping.values():
+            parallel_pattern_series[atom_subset] = field.pattern.series
         
-        return Field(field.time_series, Pattern(list(new_pattern_series)))
+        return Field(field.time_series, Pattern(list(parallel_pattern_series)))
         
 
 def parallelize_hamiltonian(
@@ -140,17 +138,17 @@ def parallelize_hamiltonian(
     Returns:
         Hamiltonian: the parallelized driving field. 
     """
-    if isinstance(hamiltonian, DrivingField):
-        return DrivingField(
-                amplitude=parallelize_field(hamiltonian.amplitude, batch_mapping),
-                phase=parallelize_field(hamiltonian.phase, batch_mapping),
-                detuning=parallelize_field(hamiltonian.detuning, batch_mapping)
-            )
-    elif isinstance(hamiltonian, ShiftingField):
+    if isinstance(hamiltonian, ShiftingField):
         return ShiftingField(parallelize_field(hamiltonian.magnitude))
+    elif isinstance(hamiltonian, DrivingField):
+        return DrivingField(
+                    amplitude=parallelize_field(hamiltonian.amplitude, batch_mapping),
+                    phase=parallelize_field(hamiltonian.phase, batch_mapping),
+                    detuning=parallelize_field(hamiltonian.detuning, batch_mapping)
+                )
     elif isinstance(hamiltonian, Hamiltonian):
         return Hamiltonian(
-                map(
+                    map(
                         lambda h: parallelize_hamiltonian(h, batch_mapping), 
                         hamiltonian.terms
                     )
