@@ -122,10 +122,13 @@ def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
 
 
 def get_field(field: braket_ir.PhysicalField):
-    times = list(np.array(field.time_series.times,dtype=np.float64))
-    values = list(np.array(field.time_series.values,dtype=np.float64))
+    times = np.array(field.time_series.times,dtype=np.float64)
+    values = np.array(field.time_series.values,dtype=np.float64)
     
-    return times, values, field.pattern
+    times = np.around(times ,13)
+    values = np.around(values, 13)
+    
+    return list(times), list(values), field.pattern
     
 def get_local_detuning(shifting):
     local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
