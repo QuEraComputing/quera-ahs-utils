@@ -1,4 +1,5 @@
-from types import NoneType
+from __future__ import annotations
+
 from braket.ahs.atom_arrangement import SiteType
 from braket.ahs.driving_field import DrivingField
 from braket.ahs.shifting_field import ShiftingField
@@ -9,7 +10,7 @@ import braket.ir.ahs as braket_ir
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement
 
-from typing import NoReturn, Tuple, Optional, Union
+from typing import NoReturn, Optional, Tuple, Union
 
 # import simplejson as json
 from braket.ir.ahs import Program
@@ -68,14 +69,14 @@ class quera_to_braket:
         return register
 
     @staticmethod
-    def get_braket_field(quera_field: Union[NoneType, GlobalField, LocalField]):
+    def get_braket_field(quera_field: Optional[Union[GlobalField, LocalField]]):
         if isinstance(quera_field, GlobalField):
             pattern = Pattern("uniform")
             time_series = drive.time_series(quera_field.times, quera_field.values)
         elif isinstance(quera_field, LocalField):
             pattern = Pattern(quera_field.lattice_site_coefficients)
             time_series = drive.time_series(quera_field.times, quera_field.values)
-        elif isinstance(quera_field, NoneType):
+        elif quera_field == None:
             return None
         else:
             raise TypeError("expecting quera_field to be one of quera_ir.GlobalField, quera_ir.LocalField.")
@@ -168,7 +169,7 @@ class braket_to_quera:
         )
     
     @staticmethod
-    def get_detuning(driving: braket_ir.DrivingField, shifting: Union[NoneType,braket_ir.ShiftingField]):
+    def get_detuning(driving: braket_ir.DrivingField, shifting: Optional[braket_ir.ShiftingField]):
         if shifting == None:
             return Detuning(
                 **{"global":braket_to_quera.get_global_field(driving.detuning)}
@@ -180,7 +181,7 @@ class braket_to_quera:
             )
 
     @staticmethod
-    def get_rydberg(driving: braket_ir.DrivingField, shifting: Union[NoneType,braket_ir.ShiftingField] = None):
+    def get_rydberg(driving: braket_ir.DrivingField, shifting: Optional[braket_ir.ShiftingField] = None):
         return Rydberg(
             rabi_frequency_amplitude = braket_to_quera.get_rabi_frequency_amplitude(driving),
             rabi_frequency_phase=braket_to_quera.get_rabi_frequency_phase(driving),
