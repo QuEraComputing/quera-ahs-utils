@@ -1,5 +1,5 @@
+from types import NoneType
 from braket.ahs.atom_arrangement import SiteType
-from braket.timings.time_series import TimeSeries
 from braket.ahs.driving_field import DrivingField
 from braket.ahs.shifting_field import ShiftingField
 from braket.ahs.pattern import Pattern
@@ -9,13 +9,16 @@ import braket.ir.ahs as braket_ir
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement
 
-from typing import NoReturn,Tuple, Optional
+from typing import NoReturn, Tuple, Optional, Union
 
 # import simplejson as json
 from braket.ir.ahs import Program
 
 import json
 import numpy as np
+
+from quera_ahs_utils.quera_ir import *
+import quera_ahs_utils.drive as drive
 
 
 __all__ = [
@@ -53,60 +56,165 @@ def from_json_file(json_filename:str) -> dict:
     return js
 
 
-def get_register(lattice):
-    register = AtomArrangement()
-    for coord,filling in zip(lattice["sites"],lattice["filling"]):
-        site_type = SiteType.FILLED if filling==1 else SiteType.VACANT
-        register.add(coord, site_type)
+class quera_to_braket:
+
+    @staticmethod
+    def get_register(lattice: Lattice):
+        register = AtomArrangement()
+        for coord,filling in zip(lattice.sites, lattice.filling):
+            site_type = SiteType.FILLED if filling==1 else SiteType.VACANT
+            register.add(coord, site_type)
+        
+        return register
+
+    @staticmethod
+    def get_braket_field(quera_field: Union[NoneType, GlobalField, LocalField]):
+        if isinstance(quera_field, GlobalField):
+            pattern = Pattern("uniform")
+            time_series = drive.time_series(quera_field.times, quera_field.values)
+        elif isinstance(quera_field, LocalField):
+            pattern = Pattern(quera_field.lattice_site_coefficients)
+            time_series = drive.time_series(quera_field.times, quera_field.values)
+        elif isinstance(quera_field, NoneType):
+            return None
+        else:
+            raise TypeError("expecting quera_field to be one of quera_ir.GlobalField, quera_ir.LocalField.")
+        
+        return Field(time_series=time_series, pattern=pattern)    
+
+    @staticmethod
+    def get_amplitude(amplitude: RabiFrequencyAmplitude):
+        return quera_to_braket.get_braket_field(amplitude.global_)
+
+    @staticmethod
+    def get_phase(phase: RabiFrequencyPhase):
+        return quera_to_braket.get_braket_field(phase.global_)
+
+    @staticmethod
+    def get_detuning(detuning: Detuning):
+        return quera_to_braket.get_braket_field(detuning.global_)
+
+    @staticmethod
+    def get_local_shifting_field(detuning: Detuning):
+        return quera_to_braket.get_braket_field(detuning.local)
     
-    return register
-
-def get_hamiltonian(effective_hamiltonian):
-    rydberg = effective_hamiltonian["rydberg"]
-
-    js_amplitude = rydberg["rabi_frequency_amplitude"]["global"]
-    js_phase = rydberg["rabi_frequency_phase"]["global"]
-    js_detuning = rydberg["detuning"]["global"]
-    js_local_detuning = rydberg["detuning"].get("local", None)
-
-    amplitude = TimeSeries()
-    detuning = TimeSeries()  
-    phase = TimeSeries()
+    @staticmethod
+    def get_driving_field(rydberg: Rydberg):
+        return DrivingField(
+            amplitude=quera_to_braket.get_amplitude(rydberg.rabi_frequency_amplitude), 
+            detuning=quera_to_braket.get_detuning(rydberg.detuning), 
+            phase=quera_to_braket.get_phase(rydberg.rabi_frequency_phase)
+        )
     
-    for t,amplitude_value in zip(js_amplitude["times"],js_amplitude["values"]):
-        amplitude.put(t, amplitude_value)
+    @staticmethod
+    def get_shifting_field(rydberg: Rydberg):
+        magnitude = quera_to_braket.get_braket_field(rydberg.detuning.local)
+        
+        if magnitude != None:        
+            return ShiftingField(magnitude)
+        else:
+            return None
 
-    for t,detuning_value in zip(js_detuning["times"],js_detuning["values"]):
-        detuning.put(t, detuning_value)
+    @staticmethod 
+    def get_hamiltonian(effective_hamiltonian: EffectiveHamiltonian ):
+        driving_field = quera_to_braket.get_driving_field(effective_hamiltonian.rydberg)
+        shifting_field = quera_to_braket.get_shifting_field(effective_hamiltonian.rydberg)
 
-    for t,phase_value in zip(js_phase["times"],js_phase["values"]):
-        phase.put(t, phase_value) 
+        if shifting_field != None:
+            return driving_field + shifting_field
+        else:
+            return driving_field
+            
+class braket_to_quera:
 
-    hamiltonian = DrivingField(
-        amplitude=amplitude, 
-        detuning=detuning, 
-        phase=phase
-    )
+    @staticmethod
+    def get_global_field(field: braket_ir.PhysicalField) -> GlobalField:
+        if not isinstance(field, braket_ir.PhysicalField): 
+            raise ValueError("expecting PhysicalField")
+        
+        if field.pattern != "uniform": 
+            raise ValueError("global field must have 'uniform' pattern.")
 
-    if js_local_detuning != None:
-        local_detuning = TimeSeries()
-        for t,detuning_value in zip(js_local_detuning["times"],js_local_detuning["values"]):
-            local_detuning.put(t, detuning_value) 
-
-        hamiltonian = hamiltonian + ShiftingField(
-            Field(
-                    local_detuning, 
-                    Pattern(js_local_detuning["lattice_site_coefficients"])
-                )
+        return GlobalField(
+                times=field.time_series.times,
+                values=field.time_series.values
             )
         
-    return hamiltonian
+    @staticmethod
+    def get_local_field(field: braket_ir.PhysicalField) -> LocalField:
+        if not isinstance(field, braket_ir.PhysicalField): 
+            raise ValueError("expecting PhysicalField")
+        
+        if field.pattern == "uniform": 
+            raise ValueError("local field must have a list of real values for the pattern.")
 
-def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
+        return LocalField(
+                times=field.time_series.times,
+                values=field.time_series.values,
+                lattice_site_coefficients=field.pattern
+            )
+        
+    @staticmethod
+    def get_rabi_frequency_amplitude(driving: braket_ir.DrivingField):
+        field = braket_to_quera.get_global_field(driving.amplitude)
+        return RabiFrequencyAmplitude(
+            **{"global":braket_to_quera.get_global_field(driving.amplitude)}
+        )
+        
+    @staticmethod
+    def get_rabi_frequency_phase(driving: braket_ir.DrivingField):
+        return RabiFrequencyPhase(
+            **{"global":braket_to_quera.get_global_field(driving.phase)}
+        )
+    
+    @staticmethod
+    def get_detuning(driving: braket_ir.DrivingField, shifting: Union[NoneType,braket_ir.ShiftingField]):
+        if shifting == None:
+            return Detuning(
+                **{"global":braket_to_quera.get_global_field(driving.detuning)}
+            )
+        else:
+            return Detuning(
+                **{"global":braket_to_quera.get_global_field(driving.detuning),
+                "local":braket_to_quera.get_local_field(shifting.magnitude)}
+            )
+
+    @staticmethod
+    def get_rydberg(driving: braket_ir.DrivingField, shifting: Union[NoneType,braket_ir.ShiftingField] = None):
+        return Rydberg(
+            rabi_frequency_amplitude = braket_to_quera.get_rabi_frequency_amplitude(driving),
+            rabi_frequency_phase=braket_to_quera.get_rabi_frequency_phase(driving),
+            detuning=braket_to_quera.get_detuning(driving, shifting)
+        )
+
+
+    @staticmethod
+    def get_effective_hamiltonian(hamiltonian_ir: braket_ir.Hamiltonian):
+        
+        driving_fields = hamiltonian_ir.drivingFields
+        shifting_fields = hamiltonian_ir.shiftingFields
+        
+        if len(driving_fields) != 1: raise ValueError("QuEra IR only supports exactly one set of driving fields")
+        if len(shifting_fields) > 1:  raise ValueError("QuEra IR only supports at most one set of shifting fields")
+        
+        if len(shifting_fields) == 0:
+            return EffectiveHamiltonian(
+                rydberg=braket_to_quera.get_rydberg(driving_fields[0])
+            )
+        else:
+            return EffectiveHamiltonian(
+                rydberg=braket_to_quera.get_rydberg(driving_fields[0], shifting_fields[0])
+            )
+
+    @staticmethod
+    def get_lattice(setup: braket_ir.Setup):            
+        return Lattice(sites=setup.ahs_register.sites, filling=setup.ahs_register.filling)
+
+def quera_task_to_braket_ahs(task_specification: QuEraTaskSpecification) -> Tuple[int,AnalogHamiltonianSimulation]:
     """Convert a QuEra compatible program to a braket AHS program. 
 
     Args:
-        js (dict): dictionary containing a program formatted to be accepted by 
+        js (QuEraTaskSpecification): An object containing a program formatted to be accepted by 
         the QuEra API. 
 
     Returns:
@@ -115,116 +223,26 @@ def quera_json_to_ahs(js: dict) -> Tuple[int,AnalogHamiltonianSimulation]:
             as the second argument. 
     """
 
-    return js["nshots"],AnalogHamiltonianSimulation(
-            register=get_register(js["lattice"]), 
-            hamiltonian=get_hamiltonian(js["effective_hamiltonian"])
+    return task_specification.nshots, AnalogHamiltonianSimulation(
+            register=quera_to_braket.get_register(task_specification.lattice), 
+            hamiltonian=quera_to_braket.get_hamiltonian(task_specification.effective_hamiltonian)
         )
 
-
-def get_field(field: braket_ir.PhysicalField):
-    times = np.array(field.time_series.times,dtype=np.float64)
-    values = np.array(field.time_series.values,dtype=np.float64)
-    
-    times = np.around(times ,13)
-    values = np.around(values, 13)
-    
-    return list(times), list(values), field.pattern
-    
-def get_local_detuning(shifting):
-    local_times, local_values, lattice_site_coefficients = get_field(shifting.magnitude)
-    
-    if lattice_site_coefficients == 'uniform': 
-        raise ValueError("local detuning must a list of detuning values, not 'uniform'")
-    
-    return {
-                "lattice_site_coefficients": [float(coeff) for coeff in lattice_site_coefficients], 
-                "times": local_times, 
-                "values": local_values
-            }
-    
-def get_detuning(driving, shifting = None):
-
-    global_times, global_values, global_pattern = get_field(driving.detuning)
-
-    if global_pattern != 'uniform': 
-        raise ValueError("Detuning must have uniform pattern")
-    
-    if shifting is None:
-        return {"global": {
-                    "times": global_times, 
-                    "values": global_values
-                    }
-                }
-    else:
-        return {"global": {
-                    "times": global_times, 
-                    "values": global_values
-                    },
-                "local": get_local_detuning(shifting)
-                }
-        
-def get_rabi(driving):
-    global_times, global_values, global_pattern = get_field(driving.amplitude)
-
-    if global_pattern != 'uniform': 
-        raise ValueError("Amplitude must have uniform pattern")
-
-    return {"global": {"times": global_times, "values": global_values}}
-
-def get_phase(driving):
-    global_times, global_values, global_pattern = get_field(driving.phase)
-
-    if global_pattern != 'uniform': 
-        raise ValueError("Phase must have uniform pattern")
-
-    return {"global": {"times": global_times, "values": global_values}}
-
-def get_rydberg(driving, shifting = None):
-    return {
-        "rabi_frequency_amplitude": get_rabi(driving),
-        "rabi_frequency_phase": get_phase(driving),
-        "detuning": get_detuning(driving, shifting)
-    }
-
-def get_effective_hamiltonian(hamiltonian_ir):
-    
-    driving_fields = hamiltonian_ir.drivingFields
-    shifting_fields = hamiltonian_ir.shiftingFields
-    
-    if len(driving_fields) != 1: raise ValueError("QuEra IR only supports exactly one set of driving fields")
-    if len(shifting_fields) > 1:  raise ValueError("QuEra IR only supports at most one set of shifting fields")
-    
-    if len(shifting_fields) == 0:
-        return {
-            "rydberg": get_rydberg(driving_fields[0])
-        }
-    else:
-        return {
-            "rydberg": get_rydberg(driving_fields[0], shifting_fields[0])
-        }       
-
-def get_lattice(setup):
-    sites = []
-    for (x,y) in setup.ahs_register.sites:
-        sites.append([float(x),float(y)])
-        
-    return {"sites":sites, "filling": setup.ahs_register.filling}
-
-def braket_sdk_to_quera_json(ahs : AnalogHamiltonianSimulation, shots: int = 1) -> dict:
-    """Translates Braket AHS IR program to Quera-compatible JSON.
+def braket_ahs_to_quera_task(ahs : AnalogHamiltonianSimulation, shots: int = 1) -> QuEraTaskSpecification:
+    """Translates Braket AHS IR program to Quera-TaskSpecification object.
 
     Args:
         ahs (AnalogHamiltonianSimulation): AHS object from braket SDK
         shots (int): The number of shots to run this program
 
     Returns:
-        dict: Serialized QuEra-compatible dict representation of program
+        QuEraTaskSpecification:  QuEraTaskSpecification object representation of program
     """
 
     ahs_ir = ahs.to_ir()
     # QuEra IR Program
-    return {
-        "nshots": shots,
-        "lattice": get_lattice(ahs_ir.setup),
-        "effective_hamiltonian" : get_effective_hamiltonian(ahs_ir.hamiltonian)
-    }
+    return QuEraTaskSpecification(
+        nshots=shots,
+        lattice=braket_to_quera.get_lattice(ahs_ir.setup),
+        effective_hamiltonian=braket_to_quera.get_effective_hamiltonian(ahs_ir.hamiltonian)
+    )
