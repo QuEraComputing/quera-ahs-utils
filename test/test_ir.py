@@ -11,7 +11,8 @@ from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement,SiteType
 
 
-from quera_ahs_utils.ir import braket_sdk_to_quera_json, quera_json_to_ahs
+from quera_ahs_utils.ir import braket_ahs_to_quera_task, quera_task_to_braket_ahs
+from quera_ahs_utils.quera_ir import QuEraTaskSpecification
 import numpy as np
 
 
@@ -100,13 +101,13 @@ class IrModule(unittest.TestCase):
     def test_quera_to_braket(self):
         nshots,ahs_program = self.generate_ahs_program()
         quera_ir = self.generate_quera_ir()
-        translated_quera_ir = braket_sdk_to_quera_json(ahs_program,shots=nshots)
-        self.assertDictEqual(translated_quera_ir,quera_ir)
+        translated_quera_ir = braket_ahs_to_quera_task(ahs_program,shots=nshots)
+        self.assertEqual(translated_quera_ir.json(by_alias=True, exclude_unset=True),json.dumps(quera_ir))
 
     def test_braket_to_quera(self):
         nshots,ahs_program = self.generate_ahs_program()
-        quera_ir = self.generate_quera_ir()
-        translated_nshots,translated_ahs_program = quera_json_to_ahs(quera_ir)
+        quera_ir = QuEraTaskSpecification(**self.generate_quera_ir())
+        translated_nshots,translated_ahs_program = quera_task_to_braket_ahs(quera_ir)
         self.assertEqual(ahs_program.to_ir().json(),translated_ahs_program.to_ir().json())
         self.assertEqual(nshots,translated_nshots)
 
