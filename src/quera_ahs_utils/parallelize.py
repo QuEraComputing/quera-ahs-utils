@@ -1,11 +1,15 @@
 
+import dataclasses
 from itertools import product
 import numpy as np
-from typing import Tuple,Union,NoReturn,Optional
+from typing import Tuple,Union, NoReturn, Optional
 from decimal import Decimal
 
 from braket.aws import AwsDevice
-from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation,DrivingField
+from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
+from braket.ahs.driving_field import DrivingField
+from braket.ahs.shifting_field import ShiftingField
+from braket.ahs.hamiltonian import Hamiltonian
 from braket.ahs.field import Field
 from braket.task_result import AnalogHamiltonianSimulationTaskResult
 from braket.ahs.atom_arrangement import AtomArrangement
@@ -38,10 +42,14 @@ def generate_parallel_register(
     Returns:
         _type_: _description_
     """
-    x_min = min(*[site.coordinate[0] for site in register])
-    x_max = max(*[site.coordinate[0] for site in register])
-    y_min = min(*[site.coordinate[1] for site in register])
-    y_max = max(*[site.coordinate[1] for site in register])
+    if len(register) > 1:
+        x_min = min(*[site.coordinate[0] for site in register])
+        x_max = max(*[site.coordinate[0] for site in register])
+        y_min = min(*[site.coordinate[1] for site in register])
+        y_max = max(*[site.coordinate[1] for site in register])
+    else:
+        x_min = x_max = 0
+        y_min = y_max = 0
 
     single_problem_width = x_max - x_min
     single_problem_height = y_max - y_min
@@ -50,35 +58,44 @@ def generate_parallel_register(
     field_of_view_width = qpu.properties.paradigm.lattice.area.width
     field_of_view_height = qpu.properties.paradigm.lattice.area.height
     n_site_max = qpu.properties.paradigm.lattice.geometry.numberSitesMax
-
-    # setting up a grid of problems filling the total area
-    n_width = int(float(field_of_view_width)   // (single_problem_width  + interproblem_distance))
-    n_height = int(float(field_of_view_height) // (single_problem_height + interproblem_distance))
-
+    
     batch_mapping = dict()
     parallel_register = AtomArrangement()
 
     atom_number = 0 #counting number of atoms added
-
-    for ix in range(n_width):
-        x_shift = ix * (single_problem_width   + interproblem_distance)
-
-        for iy in range(n_height):    
-            y_shift = iy * (single_problem_height  + interproblem_distance)
-
+    
+    ix = 0
+    while True:
+        x_shift = ix * (single_problem_width + interproblem_distance)
+        # reached the maximum number of batches possible given n_site_max
+        if atom_number + len(register) > n_site_max: break
+        # reached the maximum number of batches possible along x-direction
+        if x_shift + single_problem_width > field_of_view_width: break 
+        
+        iy = 0
+        while True:
+            y_shift = iy * (single_problem_height + interproblem_distance)
             # reached the maximum number of batches possible given n_site_max
             if atom_number + len(register) > n_site_max: break 
+            # reached the maximum number of batches possible along y-direction
+            if y_shift + single_problem_height > field_of_view_height: 
+                ix += 1
+                break
 
             atoms = []
             for site in register:
-                new_coordinate = (x_shift + site.coordinate[0], y_shift + site.coordinate[1])
+                new_coordinate = (
+                    x_shift + site.coordinate[0], 
+                    y_shift + site.coordinate[1]
+                )
                 parallel_register.add(new_coordinate,site.site_type)
 
                 atoms.append(atom_number)
 
                 atom_number += 1
-
+            
             batch_mapping[(ix,iy)] = atoms
+            iy += 1
 
     return parallel_register,batch_mapping
 
@@ -93,36 +110,51 @@ def parallelize_field(
         field (Field): the field to parallelize
         batch_mapping (dict): the mapping that describes the parallelization
 
-    Raises:
-        NotImplementedError: currently not supporting local detuning. 
-
     Returns:
         Field: the new field that works for the parallel program. 
     """
-    if field.pattern == None:
+    if field.pattern == None or field.pattern == "uniform":
         return field
     else:
-        raise NotImplementedError("Non-uniform pattern note supported in parallelization")
+        natoms = sum([len(atom_list) for atom_list in batch_mapping.values()])
 
+        parallel_pattern_series = np.empty(natoms, dtype=object)
+        for atom_subset in batch_mapping.values():
+            parallel_pattern_series[atom_subset] = field.pattern.series
+        
+        return Field(field.time_series, Pattern(list(parallel_pattern_series)))
+        
 
 def parallelize_hamiltonian(
-    driving_field: DrivingField,
+    hamiltonian: Hamiltonian,
     batch_mapping:dict
 ) -> DrivingField:
     """Generate the parallel driving fields from a batch_mapping. 
 
     Args:
-        driving_field (DrivingField): The fields to parallelize
+        hamiltonian (Hamiltonian): The fields to parallelize
         batch_mapping (dict): the mapping that generates the parallelization
 
     Returns:
-        DrivingField: the parallelized driving field. 
+        Hamiltonian: the parallelized driving field. 
     """
-    return DrivingField(
-        amplitude=parallelize_field(driving_field.amplitude,batch_mapping),
-        phase=parallelize_field(driving_field.phase,batch_mapping),
-        detuning=parallelize_field(driving_field.detuning,batch_mapping)
-        )
+    if isinstance(hamiltonian, ShiftingField):
+        return ShiftingField(parallelize_field(hamiltonian.magnitude))
+    elif isinstance(hamiltonian, DrivingField):
+        return DrivingField(
+                    amplitude=parallelize_field(hamiltonian.amplitude, batch_mapping),
+                    phase=parallelize_field(hamiltonian.phase, batch_mapping),
+                    detuning=parallelize_field(hamiltonian.detuning, batch_mapping)
+                )
+    elif isinstance(hamiltonian, Hamiltonian):
+        return Hamiltonian(
+                    map(
+                        lambda h: parallelize_hamiltonian(h, batch_mapping), 
+                        hamiltonian.terms
+                    )
+                )
+    else:
+        raise ValueError("expecting Hamiltonian or subtype of Hamiltonian")
 
 
 def parallelize_ahs(
