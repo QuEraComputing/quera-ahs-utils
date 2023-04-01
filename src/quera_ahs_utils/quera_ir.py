@@ -9,7 +9,7 @@ __all__ = [
     "RabiFrequencyAmplitude",
     "RabiFrequencyPhase",
     "Detuning",
-    "Rydberg",
+    "RydbergHamiltonian",
     "EffectiveHamiltonian",
     "Lattice",
     "QuEraTaskSpecification"
@@ -66,16 +66,16 @@ class Detuning(BaseModel):
     def __hash__(self):
         return hash((Detuning, self.global_, self.local))
     
-class Rydberg(BaseModel):
+class RydbergHamiltonian(BaseModel):
     rabi_frequency_amplitude: RabiFrequencyAmplitude
     rabi_frequency_phase: RabiFrequencyPhase
     detuning: Detuning
     
     def __hash__(self):
-        return hash((Rydberg, self.rabi_frequency_amplitude, self.rabi_frequency_phase, self.detuning))
+        return hash((RydbergHamiltonian, self.rabi_frequency_amplitude, self.rabi_frequency_phase, self.detuning))
     
 class EffectiveHamiltonian(BaseModel):
-    rydberg: Rydberg
+    rydberg: RydbergHamiltonian
     
     def __hash__(self):
         return hash((EffectiveHamiltonian, self.rydberg))

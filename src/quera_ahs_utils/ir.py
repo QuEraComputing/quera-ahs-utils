@@ -100,7 +100,7 @@ class quera_to_braket:
         return quera_to_braket.get_braket_field(detuning.local)
     
     @staticmethod
-    def get_driving_field(rydberg: Rydberg):
+    def get_driving_field(rydberg: RydbergHamiltonian):
         return DrivingField(
             amplitude=quera_to_braket.get_amplitude(rydberg.rabi_frequency_amplitude), 
             detuning=quera_to_braket.get_detuning(rydberg.detuning), 
@@ -108,7 +108,7 @@ class quera_to_braket:
         )
     
     @staticmethod
-    def get_shifting_field(rydberg: Rydberg):
+    def get_shifting_field(rydberg: RydbergHamiltonian):
         magnitude = quera_to_braket.get_braket_field(rydberg.detuning.local)
         
         if magnitude != None:        
@@ -182,7 +182,7 @@ class braket_to_quera:
 
     @staticmethod
     def get_rydberg(driving: braket_ir.DrivingField, shifting: Optional[braket_ir.ShiftingField] = None):
-        return Rydberg(
+        return RydbergHamiltonian(
             rabi_frequency_amplitude = braket_to_quera.get_rabi_frequency_amplitude(driving),
             rabi_frequency_phase=braket_to_quera.get_rabi_frequency_phase(driving),
             detuning=braket_to_quera.get_detuning(driving, shifting)
