@@ -21,7 +21,7 @@ class RydbergGlobalCapabilities(BaseModel):
     time_delta_min: float
 
 class RydbergLocalCapabilities(BaseModel):
-    detuning_in: float
+    detuning_min: float
     detuning_max: float
     detuning_slew_rate_max: float
     site_coefficient_min: float
@@ -32,7 +32,7 @@ class RydbergLocalCapabilities(BaseModel):
     time_delta_min: float
 
 class RydbergCapabilities(BaseModel):
-    c6Coefficient: float
+    c6_coefficient: float
     global_: RydbergGlobalCapabilities
     local: RydbergLocalCapabilities
 

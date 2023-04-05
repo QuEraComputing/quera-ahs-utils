@@ -2,6 +2,8 @@ from pydantic import BaseModel, conint, conlist
 from typing import Optional, List, Tuple, Union
 from decimal import Decimal
 
+from quera_ahs_utils.quera_ir.capabilities import QuEraCapabilities
+
 
 __all__ = [
     "QuEraTaskSpecification"
@@ -9,21 +11,25 @@ __all__ = [
 
 FloatType = Union[Decimal, float]
 
+def discretize_list(list_of_values: list, resolution: FloatType):
+    resolution = Decimal(str(float(resolution)))
+    return [Decimal(value).quantize(resolution) for value in list_of_values]
+
 class GlobalField(BaseModel):
-    times: conlist(FloatType, min_itens=2, unique_items=True)
-    values: conlist(FloatType, min_items=2, unique_items=True)
+    times: List[FloatType]
+    values: List[FloatType]
     
     def __hash__(self):
         return hash((GlobalField, tuple(self.times), tuple(self.values)))
-    
+        
 class LocalField(BaseModel):
-    times: conlist(FloatType, min_itens=2, unique_items=True)
-    values: conlist(FloatType, min_items=2, unique_items=True)
-    lattice_site_coefficients: conlist(FloatType, min_items=1)
+    times: List[FloatType]
+    values: List[FloatType]
+    lattice_site_coefficients: List[FloatType]
     
     def __hash__(self):
         return hash((LocalField, tuple(self.times), tuple(self.values), tuple(self.lattice_site_coefficients)))
-    
+
 class RabiFrequencyAmplitude(BaseModel):
     global_: GlobalField
     
@@ -34,6 +40,15 @@ class RabiFrequencyAmplitude(BaseModel):
     
     def __hash__(self):
         return hash((RabiFrequencyAmplitude, self.global_))
+    
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
+        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
+        
+        return RabiFrequencyAmplitude(**{"global":GlobalField(
+                times = discretize_list(self.global_.times, global_time_resolution),
+                values = discretize_list(self.global_.values, global_value_resolution))} 
+            )
 
 class RabiFrequencyPhase(BaseModel):
     global_: GlobalField
@@ -45,6 +60,15 @@ class RabiFrequencyPhase(BaseModel):
         
     def __hash__(self):
         return hash((RabiFrequencyPhase, self.global_))
+    
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
+        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
+        
+        return RabiFrequencyPhase(**{"global":GlobalField(
+                times = discretize_list(self.global_.times, global_time_resolution),
+                values = discretize_list(self.global_.values, global_value_resolution))}               
+            )
     
 class Detuning(BaseModel):
     global_: GlobalField
@@ -58,6 +82,20 @@ class Detuning(BaseModel):
     def __hash__(self):
         return hash((Detuning, self.global_, self.local))
     
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
+        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
+        
+        return Detuning(**{"global":GlobalField(
+                times = discretize_list(self.global_.times, global_time_resolution),
+                values = discretize_list(self.global_.values, global_value_resolution)
+            ),"local": LocalField(
+                    times = self.local.times, values = self.local.values,
+                    lattice_site_coefficients=self.local.lattice_site_coefficients
+                )
+            }
+        )
+    
 class RydbergHamiltonian(BaseModel):
     rabi_frequency_amplitude: RabiFrequencyAmplitude
     rabi_frequency_phase: RabiFrequencyPhase
@@ -66,18 +104,37 @@ class RydbergHamiltonian(BaseModel):
     def __hash__(self):
         return hash((RydbergHamiltonian, self.rabi_frequency_amplitude, self.rabi_frequency_phase, self.detuning))
     
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        return RydbergHamiltonian(
+            rabi_frequency_amplitude = self.rabi_frequency_amplitude.discretize(task_capabilities),
+            rabi_frequency_phase = self.rabi_frequency_phase.discretize(task_capabilities),
+            detuning = self.detuning.discretize(task_capabilities)
+        )
+
+    
 class EffectiveHamiltonian(BaseModel):
     rydberg: RydbergHamiltonian
     
     def __hash__(self):
         return hash((EffectiveHamiltonian, self.rydberg))
     
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        return EffectiveHamiltonian(rydberg = self.rydberg.discretize(task_capabilities))
+
 class Lattice(BaseModel):
-    sites: conlist(Tuple[FloatType, FloatType], min_items=1)
-    filling: conlist(int, min_items=1)
+    sites: List[Tuple[FloatType, FloatType]]
+    filling: List[conint(ge=0, le=1)]
     
     def __hash__(self):
         return hash((Lattice, tuple(self.sites), tuple(self.filling)))
+    
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        position_resolution = task_capabilities.capabilities.lattice.geometry.position_resolution
+        return Lattice(
+            sites = [discretize_list(site,position_resolution) for site in self.sites],
+            filling = self.filling
+        )
+            
     
 class QuEraTaskSpecification(BaseModel):
     nshots: conint(ge=1, le=1000)
@@ -86,4 +143,11 @@ class QuEraTaskSpecification(BaseModel):
     
     def __hash__(self):
         return hash((QuEraTaskSpecification, self.nshots, self.lattice, self.effective_hamiltonian))
+    
+    def discretize(self, task_capabilities: QuEraCapabilities):
+        return QuEraTaskSpecification(
+            nshots = self.nshots,
+            lattice = self.lattice.discretize(task_capabilities),
+            effective_hamiltonian = self.effective_hamiltonian.discretize(task_capabilities)
+        )
     

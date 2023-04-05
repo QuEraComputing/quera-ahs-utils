@@ -211,7 +211,7 @@ class braket_to_quera:
             )
 
     @staticmethod
-    def get_lattice(setup: braket_ir.Setup):            
+    def get_lattice(setup: braket_ir.Setup):
         return Lattice(sites=setup.ahs_register.sites, filling=setup.ahs_register.filling)
 
 def quera_task_to_braket_ahs(task_specification: QuEraTaskSpecification) -> Tuple[int,AnalogHamiltonianSimulation]:
