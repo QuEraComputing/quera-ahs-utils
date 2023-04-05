@@ -21,11 +21,11 @@ class RydbergGlobalCapabilities(BaseModel):
     time_delta_min: float
 
 class RydbergLocalCapabilities(BaseModel):
-    detuning_min: float
+    detuning_in: float
     detuning_max: float
-    common_detuning_resolution: float
-    local_detuning_resolution: float
     detuning_slew_rate_max: float
+    site_coefficient_min: float
+    site_coefficient_max: float
     number_local_detuning_sites: int
     spacing_radial_min: float
     time_resolution: float
