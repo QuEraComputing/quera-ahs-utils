@@ -137,7 +137,7 @@ class Lattice(BaseModel):
             
     
 class QuEraTaskSpecification(BaseModel):
-    nshots: conint(ge=1, le=1000)
+    nshots: int
     lattice: Lattice
     effective_hamiltonian: EffectiveHamiltonian
     
