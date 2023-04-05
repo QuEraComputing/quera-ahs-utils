@@ -42,7 +42,7 @@ class RabiFrequencyAmplitude(BaseModel):
         return hash((RabiFrequencyAmplitude, self.global_))
     
     def discretize(self, task_capabilities: QuEraCapabilities):
-        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_resolution
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
         
         return RabiFrequencyAmplitude(**{"global":GlobalField(
@@ -62,8 +62,8 @@ class RabiFrequencyPhase(BaseModel):
         return hash((RabiFrequencyPhase, self.global_))
     
     def discretize(self, task_capabilities: QuEraCapabilities):
-        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
-        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_resolution
+        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.phase_resolution
         
         return RabiFrequencyPhase(**{"global":GlobalField(
                 times = discretize_list(self.global_.times, global_time_resolution),
@@ -84,13 +84,14 @@ class Detuning(BaseModel):
     
     def discretize(self, task_capabilities: QuEraCapabilities):
         global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
-        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
-        
+        global_value_resolution =  task_capabilities.capabilities.rydberg.global_.detuning_resolution
+        local_time_resolution = task_capabilities.capabilities.rydberg.local.time_resolution
+
         return Detuning(**{"global":GlobalField(
                 times = discretize_list(self.global_.times, global_time_resolution),
                 values = discretize_list(self.global_.values, global_value_resolution)
             ),"local": LocalField(
-                    times = self.local.times, values = self.local.values,
+                    times = discretize_list(self.local.times, local_time_resolution), values = self.local.values,
                     lattice_site_coefficients=self.local.lattice_site_coefficients
                 )
             }
