@@ -10,9 +10,9 @@ from braket.ahs.driving_field import DrivingField
 from braket.ahs.analog_hamiltonian_simulation import AnalogHamiltonianSimulation
 from braket.ahs.atom_arrangement import AtomArrangement,SiteType
 
-
+from decimal import Decimal
 from quera_ahs_utils.ir import braket_ahs_to_quera_task, quera_task_to_braket_ahs
-from quera_ahs_utils.quera_ir.task_specification import QuEraTaskSpecification
+from quera_ahs_utils.quera_ir.task_specification import QuEraTaskSpecification, discretize_list
 import numpy as np
 
 
@@ -112,7 +112,7 @@ class IrModule(unittest.TestCase):
         self.assertEqual(nshots,translated_nshots)
 
 
-
-tester = IrModule()
-
-tester.test_braket_to_quera()
+    def test_discretize(self):
+        my_list = [0.0134234,0.324,10.000001]
+        my_discrete_list = discretize_list(my_list, 0.001)
+        self.assertEqual(my_discrete_list, [Decimal('0.013'),Decimal('0.324'),Decimal('10.0')])
