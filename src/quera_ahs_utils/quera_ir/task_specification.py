@@ -1,4 +1,4 @@
-from pydantic import BaseModel, conint, conlist
+from pydantic import BaseModel
 from typing import Optional, List, Tuple, Union
 from decimal import Decimal
 
@@ -123,7 +123,7 @@ class EffectiveHamiltonian(BaseModel):
 
 class Lattice(BaseModel):
     sites: List[Tuple[FloatType, FloatType]]
-    filling: List[conint(ge=0, le=1)]
+    filling: List[int]
     
     def __hash__(self):
         return hash((Lattice, tuple(self.sites), tuple(self.filling)))
