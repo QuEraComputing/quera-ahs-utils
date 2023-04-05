@@ -83,7 +83,7 @@ class Detuning(BaseModel):
         return hash((Detuning, self.global_, self.local))
     
     def discretize(self, task_capabilities: QuEraCapabilities):
-        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_delta_min
+        global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_resolution
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.detuning_resolution
         local_time_resolution = task_capabilities.capabilities.rydberg.local.time_resolution
 
