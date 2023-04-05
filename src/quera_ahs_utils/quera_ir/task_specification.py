@@ -1,33 +1,25 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, conint, conlist
 from typing import Optional, List, Tuple, Union
 from decimal import Decimal
 
 
 __all__ = [
-    "GlobalField",
-    "LocalField",
-    "RabiFrequencyAmplitude",
-    "RabiFrequencyPhase",
-    "Detuning",
-    "RydbergHamiltonian",
-    "EffectiveHamiltonian",
-    "Lattice",
     "QuEraTaskSpecification"
 ]
 
 FloatType = Union[Decimal, float]
 
 class GlobalField(BaseModel):
-    times: List[FloatType]
-    values: List[FloatType]
+    times: conlist(FloatType, min_itens=2, unique_items=True)
+    values: conlist(FloatType, min_items=2, unique_items=True)
     
     def __hash__(self):
         return hash((GlobalField, tuple(self.times), tuple(self.values)))
     
 class LocalField(BaseModel):
-    times: List[FloatType]
-    values: List[FloatType]
-    lattice_site_coefficients: List[FloatType]
+    times: conlist(FloatType, min_itens=2, unique_items=True)
+    values: conlist(FloatType, min_items=2, unique_items=True)
+    lattice_site_coefficients: conlist(FloatType, min_items=1)
     
     def __hash__(self):
         return hash((LocalField, tuple(self.times), tuple(self.values), tuple(self.lattice_site_coefficients)))
@@ -81,14 +73,14 @@ class EffectiveHamiltonian(BaseModel):
         return hash((EffectiveHamiltonian, self.rydberg))
     
 class Lattice(BaseModel):
-    sites: List[Tuple[float, float]]
-    filling: List[int]
+    sites: conlist(Tuple[FloatType, FloatType], min_items=1)
+    filling: conlist(int, min_items=1)
     
     def __hash__(self):
         return hash((Lattice, tuple(self.sites), tuple(self.filling)))
     
 class QuEraTaskSpecification(BaseModel):
-    nshots: int
+    nshots: conint(ge=1, le=1000)
     lattice: Lattice
     effective_hamiltonian: EffectiveHamiltonian
     

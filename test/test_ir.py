@@ -12,7 +12,7 @@ from braket.ahs.atom_arrangement import AtomArrangement,SiteType
 
 
 from quera_ahs_utils.ir import braket_ahs_to_quera_task, quera_task_to_braket_ahs
-from quera_ahs_utils.quera_ir import QuEraTaskSpecification
+from quera_ahs_utils.quera_ir.task_specification import QuEraTaskSpecification
 import numpy as np
 
 

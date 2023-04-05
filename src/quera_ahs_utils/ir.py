@@ -18,8 +18,11 @@ from braket.ir.ahs import Program
 import json
 import numpy as np
 
-from quera_ahs_utils.quera_ir import *
 import quera_ahs_utils.drive as drive
+from quera_ahs_utils.quera_ir.task_specification import (QuEraTaskSpecification, 
+    Lattice, EffectiveHamiltonian, RydbergHamiltonian, RabiFrequencyAmplitude,
+    RabiFrequencyPhase, Detuning, GlobalField, LocalField)
+
 
 
 __all__ = [
