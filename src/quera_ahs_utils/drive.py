@@ -142,7 +142,7 @@ def get_shift(times: List[float], values: List[float], pattern: List[float]) -> 
     return shift
 
 
-def get_time_series_value(time_series: TimeSeries, time: float, piecewise_constant: bool = False) -> float:
+def get_time_series_value(series: Union[TimeSeries,Field], time: float, piecewise_constant: bool = False) -> float:
     """obtain value of a time series at a specific time
 
     Args:
@@ -154,8 +154,12 @@ def get_time_series_value(time_series: TimeSeries, time: float, piecewise_consta
     Returns:
         float: the resulting sampled point. 
     """
-    times = time_series.times()
-    values = time_series.values()
+    if isinstance(series, TimeSeries):
+        times = series.times()
+        values = series.values()
+    elif isinstance(series, Field):
+        times = series.time_series.times()
+        values = series.time_series.values()
 
     if piecewise_constant:
         index = max(0, min(len(times) - 1, np.searchsorted(times, time, side="right") - 1))
@@ -397,3 +401,83 @@ def adiabatic_drive(
         detuning=time_series(times,detunings),
         phase=time_series([0,times[-1]],[0, 0])
     )
+
+
+def local_detuning_state_prep(register_state: List[int], local_detuning_max: float=150.0e6) -> Tuple[DrivingField, ShiftingField]:
+    """Generate the DrivingField and ShiftingField required to use local detuning to prepare the register in a product state. 
+
+    Args:
+        register_state (List[int]): The product state you would like to prepare
+        local_detuning_max (float, optional): The value of local detuning to apply to atoms which NOT to excit. Defaults to 150.0e6.
+
+    Raises:
+        ValueError: register_state must be a list of integers with values 0 or 1. 
+
+    Returns:
+        Tuple[DrivingField, ShiftingField]: the driving and shifting fields respectively that contains the pulses for the state preparation. 
+    """
+    
+    pattern = []
+    for state in register_state:
+        if state == 0:
+            pattern.append(1.0)
+        elif state == 1:
+            pattern.append(0.0)
+        else:
+            raise ValueError("`register_state` must be a list of integers with values 0 or 1 representing the ground and rydberg states respectively.")
+    
+    # initial ramp up of local detuning
+    ramp_up = time_series([0.0,0.07e-6],[0.0,local_detuning_max])
+    shifting_field_start = ShiftingField(
+        Field(
+            time_series=ramp_up,
+            pattern=Pattern(pattern)
+        )
+    )
+    
+    driving_field_start = DrivingField(
+        amplitude=constant_time_series(ramp_up, 0.0),
+        phase=constant_time_series(ramp_up, 0.0),
+        detuning=constant_time_series(ramp_up, 0.0)
+    )
+    
+    # resonant pi/2 pulse
+    amplitude_max =  14.28e6 # these parameters have a 
+    amplitude = time_series(
+        times = [0.0, 0.05e-6, 0.11e-6, 0.16e-6],
+        values = [0.0,amplitude_max, amplitude_max, 0.0]
+    )
+    
+    driving_field_middle = DrivingField(
+        amplitude=amplitude,
+        phase=constant_time_series(amplitude, 0.0),
+        detuning = constant_time_series(amplitude, 0.0)
+    )
+    
+    shifting_field_middle = ShiftingField(
+        Field(
+            time_series=constant_time_series(amplitude,local_detuning_max),
+            pattern=Pattern(pattern)
+        )
+    )
+    
+    # ramp down of local detuning
+    
+    ramp_down = time_series([0.0,0.07e-6],[local_detuning_max,0.0])
+    shifting_field_end = ShiftingField(
+        Field(
+            time_series=ramp_down,
+            pattern=Pattern(pattern)
+        )
+    )
+    
+    driving_field_end = DrivingField(
+        amplitude=constant_time_series(ramp_down, 0.0),
+        phase=constant_time_series(ramp_down, 0.0),
+        detuning=constant_time_series(ramp_down, 0.0)
+    )
+    
+    total_shifting_field=concatenate_shift_list([shifting_field_start, shifting_field_middle, shifting_field_end])
+    total_driving_field=concatenate_drive_list([driving_field_start, driving_field_middle, driving_field_end])
+    
+    return total_driving_field, total_shifting_field
