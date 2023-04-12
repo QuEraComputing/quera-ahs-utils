@@ -192,6 +192,32 @@ def get_driving_field_values(driving_field: DrivingField, time: float) -> Drivin
         phase = get_time_series_value(driving_field.phase, time, piecewise_constant=True),
     )
 
+# TODO: add unit test
+def merge_time_points(first_time_series: TimeSeries, second_time_series: TimeSeries) -> Tuple[TimeSeries, TimeSeries]:
+    """Return new TimeSeries for the inputs by merging the time points from each series. 
+
+    Args:
+        first_time_series (TimeSeries): First time series to merge time points
+        second_time_series (TimeSeries): Second time seroes to merge time points. 
+
+    Returns:
+        Tuple[TimeSeries, TimeSeries]: The new first and second time series with the merged time points respectively. 
+        
+    Note: This should be used with the braket local simulator as it requires the time series for the driving fields to be the same. 
+    """
+    first_times = np.asarray(first_time_series.times(),dtype=object)
+    second_times = np.asarray(second_time_series.times(),dtype=object)
+    new_times = np.unique(np.hstack([first_times, second_times]))
+    
+    new_first_time_series = TimeSeries()
+    new_second_time_series = TimeSeries()
+    
+    for time in new_times:
+        new_first_time_series.put(time, get_time_series_value(first_time_series, time))
+        new_second_time_series.put(time, get_time_series_value(second_time_series, time))  
+        
+    return new_first_time_series, new_second_time_series  
+
 
 def constant_time_series(other_time_series: TimeSeries, constant: float=0.0) -> TimeSeries:
     """Obtain a constant time series with the same time points as the given time series
