@@ -295,7 +295,7 @@ def concatenate_shift_list(shift_list: List[ShiftingField]) -> ShiftingField:
     return shift
 
 
-def slice_time_series(time_series: TimeSeries, first: float, last: float, piecewise_constant=False):
+def slice_time_series(time_series: TimeSeries, first: float, last: float, piecewise_constant=False, min_time_step: float = 0.0):
     """Obtain a sub-section of a TimeSeries between times `first` and `last`
 
         Args:
@@ -304,9 +304,14 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
             last (float): Upper bound of the slicing region
             piecewise_constant (bool, optional): Flag to use piecewise constant interpolation to get 
                 end points of slice, otherwise use piecewise linear interpolation. Defaults to False.
+            min_time_step (float): Check if the slice will fall too close to the value the input time series.
+                default value is 0.
                 
         Returns:
             TimeSeries: The resulting time series after slicing. 
+            
+        Raises: ValueError
+            When the sliced time series will have a time-step smaller than `min_time_step`. 
     """
     times = np.array(time_series.times())    
     values = np.array(time_series.values())
@@ -314,6 +319,12 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
     assert first < last
     assert first >= 0
     assert last <= times[-1]
+    
+    if np.any((times[times > first] - first) < min_time_step):
+        raise ValueError("first time step too close to existing time-point.")
+    
+    if np.any((times[times > last] - last) < min_time_step):
+        raise ValueError("first time step too close to existing time-point.")
     
     first_index = np.searchsorted(times,first)
     last_index = np.searchsorted(times,last)
@@ -334,7 +345,7 @@ def slice_time_series(time_series: TimeSeries, first: float, last: float, piecew
     
     return new_time_series
 
-def slice_drive(drive: DrivingField, first: float, last: float) -> DrivingField:
+def slice_drive(drive: DrivingField, first: float, last: float, min_time_step: float=0.0) -> DrivingField:
     """Obtain a sub-section of a driving field between times `first` and `last`
 
         Args:
@@ -346,12 +357,12 @@ def slice_drive(drive: DrivingField, first: float, last: float) -> DrivingField:
             DrivingField: The resulting driving field after slicing
     """
     return DrivingField(
-        amplitude=slice_time_series(drive.amplitude.time_series, first, last),
-        detuning=slice_time_series(drive.detuning.time_series, first, last),
-        phase=slice_time_series(drive.phase.time_series, first, last, piecewise_constant=True)
+        amplitude=slice_time_series(drive.amplitude.time_series, first, last, min_time_step=min_time_step),
+        detuning=slice_time_series(drive.detuning.time_series, first, last, min_time_step=min_time_step),
+        phase=slice_time_series(drive.phase.time_series, first, last, piecewise_constant=True, min_time_step=min_time_step)
     )
     
-def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingField:
+def slice_shift(shift: ShiftingField, first: float, last: float, min_time_step: float = 0.0) -> ShiftingField:
     """Obtain a sub-section of shifting field begin times `first` and `last`
 
     Args:
@@ -362,7 +373,7 @@ def slice_shift(shift: ShiftingField, first: float, last: float) -> ShiftingFiel
     Returns:
         ShiftingField: The resulting shifting field after slicing. 
     """
-    new_time_series = slice_time_series(shift.magnitude.time_series, first, last)
+    new_time_series = slice_time_series(shift.magnitude.time_series, first, last, min_time_step=min_time_step)
     return ShiftingField(Field(new_time_series, shift.magnitude.pattern))
 
 
