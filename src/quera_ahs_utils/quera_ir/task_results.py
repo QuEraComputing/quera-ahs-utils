@@ -3,7 +3,8 @@ from pydantic import BaseModel, conlist, conint
 from typing import List, Tuple
 
 __all__ = [
-    "QuEraTaskResults",    
+    "QuEraTaskResults",  
+    "TaskProbabilities"  
 ]
 
 class QuEraShotStatusCode(str, Enum):
