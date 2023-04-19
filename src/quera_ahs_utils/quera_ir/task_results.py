@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, conlist, conint
-from typing import Dict, Tuple
+from typing import List, Tuple
 
 __all__ = [
     "QuEraTaskResults",    
@@ -25,7 +25,7 @@ class QuEraShotResult(BaseModel):
     post_sequence: conlist(conint(ge=0, le=1), min_items=0) = []
 
 class TaskProbabilities(BaseModel):
-    probabilities: Dict[Tuple[str,str], float]
+    probabilities: List[Tuple[Tuple[str,str],float]]
 
 class QuEraTaskResults(BaseModel):
     task_status: QuEraTaskStatusCode = QuEraTaskStatusCode.Failed
@@ -53,4 +53,4 @@ class QuEraTaskResults(BaseModel):
             probabilities[configuration] = \
                 probabilities.get(configuration, 0) + 1.0/n_shots
                 
-        return TaskProbabilities(probabilities)
+        return TaskProbabilities(list(probabilities.items()))
