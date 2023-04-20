@@ -8,6 +8,8 @@ __all__ = [
     "TaskProbabilities"  
 ]
 
+# TODO: add version to these models.
+
 class QuEraShotStatusCode(str, Enum):
     Completed = "Completed"
     MissingPreSequence = "MissingPreSequence"
@@ -29,7 +31,7 @@ class QuEraShotResult(BaseModel):
 class TaskProbabilities(BaseModel):
     probabilities: List[Tuple[Tuple[str,str],float]]
     
-    def simulate_task_result(self, shots = 1):
+    def simulate_task_results(self, shots = 1) -> 'QuEraTaskResults':
         bit_strings, probabilities = zip(*self.probabilities)
         
         indices = np.random.choice(
@@ -89,7 +91,7 @@ class QuEraTaskResults(BaseModel):
             
         return TaskProbabilities(list(probabilities.items()))
     
-    def post_process(self, keep_shot_result: Optional[Callable] = None):
+    def post_process(self, keep_shot_result: Optional[Callable] = None) -> 'QuEraTaskResults':
         
         if keep_shot_result == None:
             keep_shot_result = \
