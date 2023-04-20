@@ -91,21 +91,19 @@ class QuEraTaskResults(BaseModel):
             
         return TaskProbabilities(list(probabilities.items()))
     
-    def post_process(self, keep_shot_result: Optional[Callable] = None) -> 'QuEraTaskResults':
+    def post_process(self, keep_shot_result: Optional[Callable] = None, args = ()) -> 'QuEraTaskResults':
         
         if keep_shot_result == None:
-            keep_shot_result = \
+            filter_func = \
                 lambda shot_result: \
-                    any(bit==0 for bit in shot_result.pre_sequence)
+                    all(bit==1 for bit in shot_result.pre_sequence)
+        else:
+            filter_func = lambda shot_result: \
+                keep_shot_result(shot_result, *args)
         
-        shot_outputs = []
-        for shot_result in self.shot_outputs:
-            if not keep_shot_result(shot_result):
-                continue
-            
-            shot_outputs.append(shot_result)
-            
         return QuEraTaskResults(
             task_status=self.task_status,
-            shot_outputs=shot_outputs
+            shot_outputs=list(
+                filter(filter_func, self.shot_outputs)
+            )
         )
