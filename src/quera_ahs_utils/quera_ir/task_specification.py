@@ -9,6 +9,8 @@ __all__ = [
     "QuEraTaskSpecification"
 ]
 
+# TODO: add version to these models.
+
 FloatType = Union[Decimal, float]
 
 def discretize_list(list_of_values: list, resolution: FloatType):
