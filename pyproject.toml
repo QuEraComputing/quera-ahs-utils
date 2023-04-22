@@ -20,7 +20,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+  "amazon-braket-sdk",
+  "networkx",
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "pydantic",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/QuEraComputing/quera-ahs-utils"
 "Bug Tracker" = "https://github.com/QuEraComputing/quera-ahs-utils/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
