@@ -162,25 +162,25 @@ class braket_to_quera:
     def get_rabi_frequency_amplitude(driving: braket_ir.DrivingField):
         field = braket_to_quera.get_global_field(driving.amplitude)
         return RabiFrequencyAmplitude(
-            **{"global":braket_to_quera.get_global_field(driving.amplitude)}
+            global_=braket_to_quera.get_global_field(driving.amplitude)
         )
         
     @staticmethod
     def get_rabi_frequency_phase(driving: braket_ir.DrivingField):
         return RabiFrequencyPhase(
-            **{"global":braket_to_quera.get_global_field(driving.phase)}
+            global_=braket_to_quera.get_global_field(driving.phase)
         )
     
     @staticmethod
     def get_detuning(driving: braket_ir.DrivingField, shifting: Optional[braket_ir.ShiftingField]):
         if shifting == None:
             return Detuning(
-                **{"global":braket_to_quera.get_global_field(driving.detuning)}
+                global_=braket_to_quera.get_global_field(driving.detuning)
             )
         else:
             return Detuning(
-                **{"global":braket_to_quera.get_global_field(driving.detuning),
-                "local":braket_to_quera.get_local_field(shifting.magnitude)}
+                global_=braket_to_quera.get_global_field(driving.detuning),
+                local=braket_to_quera.get_local_field(shifting.magnitude)
             )
 
     @staticmethod
