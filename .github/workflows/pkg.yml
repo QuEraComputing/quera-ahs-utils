@@ -31,7 +31,7 @@ jobs:
     - name: python setup
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.10'
 
     - name: Checking pip 
       run:  python3 -m ensurepip --upgrade
@@ -52,8 +52,8 @@ jobs:
         password: ${{ secrets.PYPI_API_TOKEN }}
 
     - name: Get Version
-      run: echo VERSION="$(python3 setup.py --version)" >> $GITHUB_ENV
-      
+      run: echo VERSION="$(python3 -c "import pkg_resources; print(pkg_resources.get_distribution('quera-ahs-utils').version)")" >> $GITHUB_ENV
+
     - name: Tag Release
       uses: softprops/action-gh-release@v1
       with:

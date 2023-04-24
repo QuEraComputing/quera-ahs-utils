@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quera-ahs-utils"
-version = "0.3.2"
+version = "0.4.0"
 authors = [
   { name="Phillip Weinberg", email="pweinberg@quera.com" },
   { name="John Long", email="jlong@quera.com" }
@@ -15,12 +15,23 @@ maintainers = [
 ]
 description = "Various tools to interact with Braket Analog Hamiltonian Computing"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "amazon-braket-sdk",
+  "networkx",
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "pydantic",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/QuEraComputing/quera-ahs-utils"
 "Bug Tracker" = "https://github.com/QuEraComputing/quera-ahs-utils/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
