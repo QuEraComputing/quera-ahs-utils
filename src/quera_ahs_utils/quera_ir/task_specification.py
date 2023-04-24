@@ -89,13 +89,18 @@ class Detuning(BaseModel):
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.detuning_resolution
         local_time_resolution = task_capabilities.capabilities.rydberg.local.time_resolution
 
+        if self.local != None:
+            self.local = LocalField(
+                    times = discretize_list(self.local.times, local_time_resolution), 
+                    values = self.local.values,
+                    lattice_site_coefficients=self.local.lattice_site_coefficients
+                )
+
+
         return Detuning(**{"global":GlobalField(
                 times = discretize_list(self.global_.times, global_time_resolution),
                 values = discretize_list(self.global_.values, global_value_resolution)
-            ),"local": LocalField(
-                    times = discretize_list(self.local.times, local_time_resolution), values = self.local.values,
-                    lattice_site_coefficients=self.local.lattice_site_coefficients
-                )
+            ),"local": self.local
             }
         )
     
