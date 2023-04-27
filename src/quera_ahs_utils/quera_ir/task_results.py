@@ -62,7 +62,7 @@ class QuEraTaskResults(BaseModel):
     task_status: QuEraTaskStatusCode = QuEraTaskStatusCode.Failed
     shot_outputs: conlist(QuEraShotResult, min_items=0) = []
     
-    def export_as_probabilties(self) -> TaskProbabilities:
+    def export_as_probabilities(self) -> TaskProbabilities:
         """converts from shot results to probabilities
 
         Returns:
