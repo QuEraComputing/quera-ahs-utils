@@ -36,6 +36,7 @@ class RabiFrequencyAmplitude(BaseModel):
     global_: GlobalField
     
     class Config:
+        allow_population_by_field_name = True
         fields = {
             'global_': 'global'
         }
@@ -47,15 +48,18 @@ class RabiFrequencyAmplitude(BaseModel):
         global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_resolution
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.rabi_frequency_resolution
         
-        return RabiFrequencyAmplitude(**{"global":GlobalField(
+        return RabiFrequencyAmplitude(
+            global_ = GlobalField(
                 times = discretize_list(self.global_.times, global_time_resolution),
-                values = discretize_list(self.global_.values, global_value_resolution))} 
-            )
+                values = discretize_list(self.global_.values, global_value_resolution)
+            ) 
+        )
 
 class RabiFrequencyPhase(BaseModel):
     global_: GlobalField
     
     class Config:
+        allow_population_by_field_name = True
         fields = {
             'global_': 'global'
         }
@@ -67,9 +71,10 @@ class RabiFrequencyPhase(BaseModel):
         global_time_resolution = task_capabilities.capabilities.rydberg.global_.time_resolution
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.phase_resolution
         
-        return RabiFrequencyPhase(**{"global":GlobalField(
-                times = discretize_list(self.global_.times, global_time_resolution),
-                values = discretize_list(self.global_.values, global_value_resolution))}               
+        return RabiFrequencyPhase(global_=GlobalField(
+                    times = discretize_list(self.global_.times, global_time_resolution),
+                    values = discretize_list(self.global_.values, global_value_resolution)
+                )
             )
     
 class Detuning(BaseModel):
@@ -77,6 +82,7 @@ class Detuning(BaseModel):
     local: Optional[LocalField]
     
     class Config:
+        allow_population_by_field_name = True
         fields = {
             'global_': 'global'
         }
@@ -89,15 +95,21 @@ class Detuning(BaseModel):
         global_value_resolution =  task_capabilities.capabilities.rydberg.global_.detuning_resolution
         local_time_resolution = task_capabilities.capabilities.rydberg.local.time_resolution
 
-        return Detuning(**{"global":GlobalField(
-                times = discretize_list(self.global_.times, global_time_resolution),
-                values = discretize_list(self.global_.values, global_value_resolution)
-            ),"local": LocalField(
-                    times = discretize_list(self.local.times, local_time_resolution), values = self.local.values,
+        if self.local != None:
+            self.local = LocalField(
+                    times = discretize_list(self.local.times, local_time_resolution), 
+                    values = self.local.values,
                     lattice_site_coefficients=self.local.lattice_site_coefficients
                 )
-            }
-        )
+
+
+        return Detuning(
+                global_ = GlobalField(
+                    times = discretize_list(self.global_.times, global_time_resolution),
+                    values = discretize_list(self.global_.values, global_value_resolution)
+                ),
+                local = self.local
+            )
     
 class RydbergHamiltonian(BaseModel):
     rabi_frequency_amplitude: RabiFrequencyAmplitude

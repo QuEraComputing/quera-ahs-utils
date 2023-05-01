@@ -62,17 +62,15 @@ class QuEraTaskResults(BaseModel):
     task_status: QuEraTaskStatusCode = QuEraTaskStatusCode.Failed
     shot_outputs: conlist(QuEraShotResult, min_items=0) = []
     
-    def export_as_probabilties(self, post_process=False) -> TaskProbabilities:
+    def export_as_probabilities(self) -> TaskProbabilities:
         """converts from shot results to probabilities
 
         Returns:
             TaskProbabilities: The task results as probabilties
         """
-        probabilities = dict()
-        n = 0
+        counts = dict()
+        nshots = len(self.shot_outputs)
         for shot_result in self.shot_outputs:
-            if any(bit==0 for bit in shot_result.pre_sequence):
-                continue
             
             pre_sequence_str = "".join(
                 str(bit) for bit in shot_result.pre_sequence
@@ -82,14 +80,13 @@ class QuEraTaskResults(BaseModel):
                 str(bit) for bit in shot_result.post_sequence
             )
             
-            configuration = (pre_sequence_str,post_sequence_str)
+            configuration = (pre_sequence_str, post_sequence_str)
             # iterative average
-            probabilities[configuration] = \
-                ((n + 1.0) * probabilities.get(configuration, 0) + 1.0)/n
-                
-            n += 1
-            
-        return TaskProbabilities(list(probabilities.items()))
+            current_count = counts.get(configuration, 0)
+            counts[configuration] = current_count + 1
+
+        probabilities = [(config,count/nshots) for config,count in counts.items()]
+        return TaskProbabilities(probabilities=probabilities)
     
     def post_process(self, keep_shot_result: Optional[Callable] = None, args = ()) -> 'QuEraTaskResults':
         
