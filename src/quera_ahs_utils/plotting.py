@@ -248,3 +248,79 @@ def plot_avg_density(densities, register, with_labels = True, custom_axes = None
     else:
         return None,ax
 
+
+
+def plot_task(task,show_register=False):
+    rabi_times = np.array(task.hamiltonian.amplitude.time_series.times())/1e-6
+    rabi_vals  = np.array(task.hamiltonian.amplitude.time_series.values())/1e6
+    
+    phase_times = np.array(task.hamiltonian.phase.time_series.times())/1e-6
+    phase_vals  = np.array(task.hamiltonian.phase.time_series.values())
+    
+    detuning_times = np.array(task.hamiltonian.detuning.time_series.times())/1e-6
+    detuning_vals  = np.array(task.hamiltonian.detuning.time_series.values())/1e6
+    
+    pos_filled = np.array([atom.coordinate for atom in task.register if atom.site_type == SiteType.FILLED])*1e6
+    pos_empty = np.array([atom.coordinate for atom in task.register if atom.site_type == SiteType.VACANT])*1e6
+    
+    if show_register==False:
+        fig = plt.figure(figsize=(8,8))
+        ax = plt.subplot(3,1,1)
+        plt.plot(rabi_times,rabi_vals,"k.-",linewidth=2)
+        plt.fill_between(rabi_times,rabi_vals,color="#C2477F",alpha=0.2)
+        ax.axis([min(rabi_times) - 0.05*max(rabi_times),max(rabi_times)*1.05,ax.axis()[2],ax.axis()[3]])
+        ax.set_yticks(np.linspace(0,15,4))
+        plt.ylabel("$\\Omega(t)$ (rad/usec)")
+        #xlabel("Time along protocol (sec)")
+        
+        ax = plt.subplot(3,1,2)
+        plt.plot(detuning_times,detuning_vals,"k.-",linewidth=2)
+        plt.fill_between(detuning_times,detuning_vals,color="#55de79",alpha=0.2)
+        plt.axis([min(detuning_times) - 0.05*max(detuning_times),max(rabi_times)*1.05,ax.axis()[2],ax.axis()[3]])
+        plt.ylabel("$\\Delta(t)$ (rad/usec)")
+        #xlabel("Time along protocol (sec)")
+        
+        ax = plt.subplot(3,1,3)
+        for ind in range(len(phase_vals)-1):
+            plt.plot([phase_times[ind],phase_times[ind+1]] , [phase_vals[ind], phase_vals[ind]],'k.-',linewidth=2)
+        ax.axis([min(phase_times) - 0.05*max(phase_times),max(phase_times)*1.05,ax.axis()[2],ax.axis()[3]])
+        plt.ylabel("$\\phi(t)$ (rad)")
+        plt.xlabel("Time along protocol (usec)")
+        
+        plt.subplots_adjust(left=0.175)
+    else:
+        fig = plt.figure(figsize=(16,8))
+        ax = plt.subplot(3,2,1)
+        ax.set_yticks(np.linspace(0,15,4))
+        plt.plot(rabi_times,rabi_vals,"k.-",linewidth=2)
+        plt.fill_between(rabi_times,rabi_vals,color="#C2477F",alpha=0.2)
+        plt.axis([min(rabi_times) - 0.05*max(rabi_times),max(rabi_times)*1.05,plt.axis()[2],plt.axis()[3]])
+        plt.ylabel("$\\Omega(t)$ (rad/usec)")
+        #xlabel("Time along protocol (sec)")
+        
+        ax = plt.subplot(3,2,3)
+        plt.plot(detuning_times,detuning_vals,"k.-",linewidth=2)
+        plt.fill_between(detuning_times,detuning_vals,color="#55de79",alpha=0.2)
+        ax.axis([min(detuning_times) - 0.05*max(detuning_times),max(rabi_times)*1.05,ax.axis()[2],ax.axis()[3]])
+        plt.ylabel("$\\Delta(t)$ (rad/usec)")
+        #xlabel("Time along protocol (sec)")
+        
+        ax = plt.subplot(3,2,5)
+        for ind in range(len(phase_vals)-1):
+            plt.plot([phase_times[ind],phase_times[ind+1]] , [phase_vals[ind], phase_vals[ind]],'k.-',linewidth=2)
+        ax.axis([min(phase_times) - 0.05*max(phase_times),max(phase_times)*1.05,ax.axis()[2],ax.axis()[3]])
+        plt.ylabel("$\\phi(t)$ (rad)")
+        plt.xlabel("Time along protocol (usec)")
+        
+        ax = plt.subplot(1,2,2)
+        #axis([-1,76,-1,76])
+        ax.axis([-5,80,-5,80])
+        
+        
+        if len(pos_filled)>0:
+            plt.scatter(pos_filled[:,0],pos_filled[:,1],color="#6437FF",s=200)
+        if len(pos_empty)>0:
+            plt.scatter(pos_empty[:,0],pos_empty[:,1],color="grey",s=200)
+        ax.set_aspect("equal")
+        
+        plt.subplots_adjust(left=0.175/2)
