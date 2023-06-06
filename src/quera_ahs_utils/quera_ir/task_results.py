@@ -85,8 +85,8 @@ class QuEraTaskResults(BaseModel):
             
             configuration = (pre_sequence_str,post_sequence_str)
             # iterative average
-            probabilities[configuration] = \
-                ((n + 1.0) * probabilities.get(configuration, 0) + 1.0)/n
+            prob = probabilities.get(configuration, 0)
+            probabilities[configuration] = prob + (1 - prob)/(n + 1)
                 
             n += 1
             
@@ -95,12 +95,11 @@ class QuEraTaskResults(BaseModel):
     def post_process(self, keep_shot_result: Optional[Callable] = None, args = ()) -> 'QuEraTaskResults':
         
         if keep_shot_result == None:
-            filter_func = \
-                lambda shot_result: \
-                    all(bit==1 for bit in shot_result.pre_sequence)
+            def filter_func(shot_result):
+                return all(bit == 1 for bit in shot_result.pre_sequence)
         else:
-            filter_func = lambda shot_result: \
-                keep_shot_result(shot_result, *args)
+            def filter_func(shot_result):
+                return keep_shot_result(shot_result, *args)
         
         return QuEraTaskResults(
             task_status=self.task_status,
