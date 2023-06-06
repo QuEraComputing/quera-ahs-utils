@@ -22,6 +22,7 @@ class QuEraTaskStatusCode(str, Enum):
     Completed = "Completed"
     Failed = "Failed"
     Cancelled = "Cancelled"
+    Partial = "Partial"
 
 class QuEraShotResult(BaseModel):
     shot_status: QuEraShotStatusCode = QuEraShotStatusCode.MissingMeasurement
@@ -62,14 +63,14 @@ class QuEraTaskResults(BaseModel):
     task_status: QuEraTaskStatusCode = QuEraTaskStatusCode.Failed
     shot_outputs: conlist(QuEraShotResult, min_items=0) = []
     
-    def export_as_probabilities(self) -> TaskProbabilities:
+    def export_as_probabilties(self) -> TaskProbabilities:
         """converts from shot results to probabilities
 
         Returns:
             TaskProbabilities: The task results as probabilties
         """
-        counts = dict()
-        nshots = len(self.shot_outputs)
+        probabilities = dict()
+        n = 0
         for shot_result in self.shot_outputs:
             
             pre_sequence_str = "".join(
@@ -80,23 +81,23 @@ class QuEraTaskResults(BaseModel):
                 str(bit) for bit in shot_result.post_sequence
             )
             
-            configuration = (pre_sequence_str, post_sequence_str)
+            configuration = (pre_sequence_str,post_sequence_str)
             # iterative average
-            current_count = counts.get(configuration, 0)
-            counts[configuration] = current_count + 1
-
-        probabilities = [(config,count/nshots) for config,count in counts.items()]
-        return TaskProbabilities(probabilities=probabilities)
+            prob = probabilities.get(configuration, 0)
+            probabilities[configuration] = prob + (1 - prob)/(n + 1)
+                
+            n += 1
+            
+        return TaskProbabilities(list(probabilities.items()))
     
     def post_process(self, keep_shot_result: Optional[Callable] = None, args = ()) -> 'QuEraTaskResults':
         
         if keep_shot_result == None:
-            filter_func = \
-                lambda shot_result: \
-                    all(bit==1 for bit in shot_result.pre_sequence)
+            def filter_func(shot_result):
+                return all(bit == 1 for bit in shot_result.pre_sequence)
         else:
-            filter_func = lambda shot_result: \
-                keep_shot_result(shot_result, *args)
+            def filter_func(shot_result):
+                return keep_shot_result(shot_result, *args)
         
         return QuEraTaskResults(
             task_status=self.task_status,
