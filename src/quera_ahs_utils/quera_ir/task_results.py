@@ -63,7 +63,7 @@ class QuEraTaskResults(BaseModel):
     task_status: QuEraTaskStatusCode = QuEraTaskStatusCode.Failed
     shot_outputs: conlist(QuEraShotResult, min_items=0) = []
     
-    def export_as_probabilties(self, post_process=False) -> TaskProbabilities:
+    def export_as_probabilties(self) -> TaskProbabilities:
         """converts from shot results to probabilities
 
         Returns:
@@ -72,8 +72,6 @@ class QuEraTaskResults(BaseModel):
         probabilities = dict()
         n = 0
         for shot_result in self.shot_outputs:
-            if any(bit==0 for bit in shot_result.pre_sequence):
-                continue
             
             pre_sequence_str = "".join(
                 str(bit) for bit in shot_result.pre_sequence
