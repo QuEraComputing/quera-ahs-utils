@@ -1,3 +1,8 @@
+#  :warning: This Package is being Deprecated  :warning:
+
+Thank you for your interest in Aquila and AHS through braket! If you have found these tools useful we know you will love our new [Python SDK for Bloqade](https://github.com/QuEraComputing/bloqade-python). 
+
+
 # quera-ahs-utils
 This python package is a collection of tools that can be used to program QuEra's **neutral atom Analog Hamiltonian Simulator** (**ahs**). These tools are primarily targeted towards the usage of [Amazon's Braket quantum computing service](https://aws.amazon.com/braket/). The Braket Python SDK can be found [here](https://github.com/aws/amazon-braket-sdk-python) along with some examples of how to use their service through a collection of examples from both [Braket](https://github.com/aws/amazon-braket-examples/tree/main/examples/analog_hamiltonian_simulation) and [QuEra](https://github.com/QuEraComputing/QuEra-braket-examples).
 
