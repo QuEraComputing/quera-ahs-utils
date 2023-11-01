@@ -155,7 +155,7 @@ class QuEraTaskSpecification(BaseModel):
     nshots: int
     lattice: Lattice
     effective_hamiltonian: EffectiveHamiltonian
-    metadata: str
+    metadata: Optional[str] = None
     
     def __hash__(self):
         return hash((QuEraTaskSpecification, self.nshots, self.lattice, self.effective_hamiltonian))
