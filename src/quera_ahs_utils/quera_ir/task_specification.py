@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from typing import Optional, List, Tuple, Union
 from decimal import Decimal
 
