@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quera-ahs-utils"
-version = "0.4.3"
+version = "0.4.4"
 authors = [
   { name="Phillip Weinberg", email="pweinberg@quera.com" },
   { name="John Long", email="jlong@quera.com" }
@@ -26,7 +26,7 @@ dependencies = [
   "numpy",
   "scipy",
   "matplotlib",
-  "pydantic",
+  "pydantic>=2.0.0",
 ]
 
 [project.urls]

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from typing import Optional, List, Tuple, Union
 from decimal import Decimal
 
@@ -155,6 +155,7 @@ class QuEraTaskSpecification(BaseModel):
     nshots: int
     lattice: Lattice
     effective_hamiltonian: EffectiveHamiltonian
+    metadata: Optional[str] = None
     
     def __hash__(self):
         return hash((QuEraTaskSpecification, self.nshots, self.lattice, self.effective_hamiltonian))
@@ -163,6 +164,7 @@ class QuEraTaskSpecification(BaseModel):
         return QuEraTaskSpecification(
             nshots = self.nshots,
             lattice = self.lattice.discretize(task_capabilities),
-            effective_hamiltonian = self.effective_hamiltonian.discretize(task_capabilities)
+            effective_hamiltonian = self.effective_hamiltonian.discretize(task_capabilities),
+            metadata=self.metadata,
         )
     
