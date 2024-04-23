@@ -164,6 +164,7 @@ class QuEraTaskSpecification(BaseModel):
         return QuEraTaskSpecification(
             nshots = self.nshots,
             lattice = self.lattice.discretize(task_capabilities),
-            effective_hamiltonian = self.effective_hamiltonian.discretize(task_capabilities)
+            effective_hamiltonian = self.effective_hamiltonian.discretize(task_capabilities),
+            metadata=self.metadata,
         )
     
